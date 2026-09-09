@@ -7,34 +7,24 @@ function Dashboard() {
 
   const gererDeconnexion = () => {
     deconnecter();
-    naviguer("/connexion");
+    naviguer("/connexion", { replace: true });
   };
 
   return (
-    <main className="page-simple">
-      <section className="carte-simple">
-        <p className="etiquette">Tableau de bord</p>
+    <main>
+      <h1>Tableau de bord RH</h1>
 
-        <h1>Bienvenue, {utilisateur.nom}</h1>
+      <p>
+        Bienvenue, <strong>{utilisateur.nom}</strong>
+      </p>
 
-        <p>
-          Vous êtes connecté comme :
-          <strong> {utilisateur.role}</strong>
-        </p>
+      <p>
+        Fonction : {utilisateur.role}
+      </p>
 
-        <p>
-          Le tableau de bord avec les statistiques sera ajouté
-          prochainement.
-        </p>
-
-        <button
-          type="button"
-          className="bouton-danger"
-          onClick={gererDeconnexion}
-        >
-          Se déconnecter
-        </button>
-      </section>
+      <button type="button" onClick={gererDeconnexion}>
+        Se déconnecter
+      </button>
     </main>
   );
 }

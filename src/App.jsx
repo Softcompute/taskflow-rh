@@ -4,7 +4,12 @@ import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import './App.css'
 
-import { Navigate, Route, Routes } from "react-router-dom";
+import {
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
+
 import RoutePrivee from "./components/RoutePrivee";
 import Connexion from "./pages/Connexion";
 import Inscription from "./pages/Inscription";
@@ -21,8 +26,15 @@ function App() {
         element={<Navigate to="/dashboard" replace />}
       />
 
-      <Route path="/connexion" element={<Connexion />} />
-      <Route path="/inscription" element={<Inscription />} />
+      <Route
+        path="/connexion"
+        element={<Connexion />}
+      />
+
+      <Route
+        path="/inscription"
+        element={<Inscription />}
+      />
 
       <Route
         path="/dashboard"

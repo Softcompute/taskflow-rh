@@ -1,4 +1,9 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 const AuthContext = createContext(null);
 
@@ -22,12 +27,19 @@ export function AuthProvider({ children }) {
     setChargementAuth(false);
   }, []);
 
-  const connecter = (nouvelUtilisateur) => {
-    setUtilisateur(nouvelUtilisateur);
+  const connecter = (utilisateurConnecte) => {
+    const utilisateurSansMotDePasse = {
+      id: utilisateurConnecte.id,
+      nom: utilisateurConnecte.nom,
+      email: utilisateurConnecte.email,
+      role: utilisateurConnecte.role,
+    };
+
+    setUtilisateur(utilisateurSansMotDePasse);
 
     localStorage.setItem(
       "taskflow_utilisateur",
-      JSON.stringify(nouvelUtilisateur)
+      JSON.stringify(utilisateurSansMotDePasse)
     );
   };
 
@@ -55,7 +67,7 @@ export function useAuth() {
 
   if (!contexte) {
     throw new Error(
-      "useAuth doit être utilisé à l'intérieur de AuthProvider"
+      "useAuth doit être utilisé dans AuthProvider."
     );
   }
 

@@ -1,14 +1,19 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+
 import { useAuth } from "../context/AuthContext";
 
 function Connexion() {
   const [email, setEmail] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
-  const [erreur, setErreur] = useState("");
   const [chargement, setChargement] = useState(false);
+  const [erreur, setErreur] = useState("");
 
-  const { connecter } = useAuth();
+  const { utilisateur, connecter } = useAuth();
   const naviguer = useNavigate();
   const localisation = useLocation();
 
@@ -27,9 +32,11 @@ function Connexion() {
     try {
       setChargement(true);
 
-      const reponse = await fetch(
-        `http://localhost:3000/utilisateurs?email=${encodeURIComponent(email)}`
-      );
+      const adresse =
+        "http://localhost:3000/utilisateurs" +
+        `?email=${encodeURIComponent(email.trim())}`;
+
+      const reponse = await fetch(adresse);
 
       if (!reponse.ok) {
         throw new Error("Impossible de contacter le serveur.");
@@ -38,9 +45,10 @@ function Connexion() {
       const utilisateurs = await reponse.json();
 
       const utilisateurTrouve = utilisateurs.find(
-        (utilisateur) =>
-          utilisateur.email.toLowerCase() === email.trim().toLowerCase() &&
-          utilisateur.motDePasse === motDePasse
+        (element) =>
+          element.email.toLowerCase() ===
+            email.trim().toLowerCase() &&
+          element.motDePasse === motDePasse
       );
 
       if (!utilisateurTrouve) {
@@ -57,17 +65,31 @@ function Connexion() {
     }
   };
 
+  if (utilisateur) {
+    return (
+      <main>
+        <h1>Vous êtes déjà connecté</h1>
+
+        <button
+          type="button"
+          onClick={() => naviguer("/dashboard")}
+        >
+          Aller au tableau de bord
+        </button>
+      </main>
+    );
+  }
+
   return (
-    <main className="page-auth">
-      <section className="carte-auth">
-        <div className="logo">TF</div>
+    <main className="page-connexion">
+      <section className="carte-connexion">
+        <h1>Connexion</h1>
 
-        <h1>TaskFlow RH</h1>
-        <p className="sous-titre">
-          Connectez-vous pour gérer vos projets RH.
-        </p>
+        <p>Connectez-vous à TaskFlow RH.</p>
 
-        {erreur && <div className="message-erreur">{erreur}</div>}
+        {erreur && (
+          <p className="message-erreur">{erreur}</p>
+        )}
 
         <form onSubmit={gererConnexion}>
           <div className="groupe-champ">
@@ -77,14 +99,18 @@ function Connexion() {
               id="email"
               type="email"
               value={email}
-              onChange={(evenement) => setEmail(evenement.target.value)}
-              placeholder="exemple@entreprise.com"
+              onChange={(evenement) =>
+                setEmail(evenement.target.value)
+              }
+              placeholder="gael@taskflow-rh.cd"
               autoComplete="email"
             />
           </div>
 
           <div className="groupe-champ">
-            <label htmlFor="motDePasse">Mot de passe</label>
+            <label htmlFor="motDePasse">
+              Mot de passe
+            </label>
 
             <input
               id="motDePasse"
@@ -98,18 +124,16 @@ function Connexion() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="bouton-principal"
-            disabled={chargement}
-          >
+          <button type="submit" disabled={chargement}>
             {chargement ? "Connexion..." : "Se connecter"}
           </button>
         </form>
 
-        <p className="lien-auth">
+        <p>
           Vous n’avez pas de compte ?{" "}
-          <Link to="/inscription">Créer un compte</Link>
+          <Link to="/inscription">
+            Créer un compte
+          </Link>
         </p>
       </section>
     </main>
