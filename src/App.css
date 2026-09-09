@@ -1,0 +1,170 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: "Inter", Arial, sans-serif;
+  color: #172033;
+  background: #f4f7fb;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.page-auth,
+.page-simple {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.page-auth {
+  background:
+    radial-gradient(circle at top left, #dbeafe, transparent 35%),
+    linear-gradient(135deg, #eff6ff, #f8fafc);
+}
+
+.carte-auth,
+.carte-simple {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.1);
+}
+
+.carte-auth {
+  max-width: 440px;
+  padding: 38px;
+}
+
+.carte-simple {
+  max-width: 720px;
+  padding: 40px;
+}
+
+.logo {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 24px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 15px;
+  background: #2563eb;
+}
+
+h1 {
+  margin: 0 0 10px;
+  color: #0f172a;
+}
+
+.sous-titre {
+  margin: 0 0 28px;
+  color: #64748b;
+}
+
+.groupe-champ {
+  margin-bottom: 18px;
+}
+
+.groupe-champ label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.groupe-champ input,
+.groupe-champ select {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.groupe-champ input:focus,
+.groupe-champ select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.bouton-principal,
+.bouton-danger {
+  border: none;
+  border-radius: 10px;
+  padding: 13px 18px;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bouton-principal {
+  width: 100%;
+  background: #2563eb;
+}
+
+.bouton-principal:hover {
+  background: #1d4ed8;
+}
+
+.bouton-principal:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.bouton-danger {
+  margin-top: 20px;
+  background: #dc2626;
+}
+
+.message-erreur {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+}
+
+.lien-auth {
+  margin: 24px 0 0;
+  text-align: center;
+  color: #64748b;
+}
+
+.etiquette {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+@media (max-width: 500px) {
+  .carte-auth,
+  .carte-simple {
+    padding: 25px;
+  }
+}

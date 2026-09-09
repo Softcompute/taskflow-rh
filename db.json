@@ -1,0 +1,171 @@
+{
+  "utilisateurs": [
+    {
+      "id": "1",
+      "nom": "Gael Ekofo",
+      "email": "gael@taskflow-rh.cd",
+      "motDePasse": "1234",
+      "role": "Responsable RH"
+    }
+  ],
+  "projets": [
+    {
+      "id": "1",
+      "utilisateurId": "1",
+      "nom": "Recrutement développeur web",
+      "description": "Recrutement d'un développeur front-end pour le département informatique.",
+      "couleur": "#2563EB",
+      "creeLe": "2026-09-08"
+    },
+    {
+      "id": "2",
+      "utilisateurId": "1",
+      "nom": "Formation du personnel",
+      "description": "Organisation d'une formation sur les outils numériques.",
+      "couleur": "#059669",
+      "creeLe": "2026-09-08"
+    },
+    {
+      "id": "3",
+      "utilisateurId": "1",
+      "nom": "Préparation de la paie",
+      "description": "Préparation et vérification des éléments de paie du mois.",
+      "couleur": "#D97706",
+      "creeLe": "2026-09-08"
+    }
+  ],
+  "taches": [
+    {
+      "id": "1",
+      "projetId": "1",
+      "titre": "Rédiger l'offre d'emploi",
+      "description": "Préparer la description du poste et les compétences recherchées.",
+      "statut": "terminee",
+      "priorite": "haute",
+      "echeance": "2026-09-09",
+      "creeLe": "2026-09-08",
+      "modifieLe": "2026-09-08"
+    },
+    {
+      "id": "2",
+      "projetId": "1",
+      "titre": "Publier l'offre d'emploi",
+      "description": "Publier l'offre sur les plateformes de recrutement.",
+      "statut": "en_cours",
+      "priorite": "haute",
+      "echeance": "2026-09-10",
+      "creeLe": "2026-09-08",
+      "modifieLe": "2026-09-08"
+    },
+    {
+      "id": "3",
+      "projetId": "1",
+      "titre": "Examiner les candidatures",
+      "description": "Analyser les CV reçus et sélectionner les meilleurs profils.",
+      "statut": "a_faire",
+      "priorite": "haute",
+      "echeance": "2026-09-12",
+      "creeLe": "2026-09-08",
+      "modifieLe": "2026-09-08"
+    },
+    {
+      "id": "4",
+      "projetId": "1",
+      "titre": "Organiser les entretiens",
+      "description": "Planifier les entretiens avec les candidats sélectionnés.",
+      "statut": "a_faire",
+      "priorite": "moyenne",
+      "echeance": "2026-09-14",
+      "creeLe": "2026-09-08",
+      "modifieLe": "2026-09-08"
+    },
+    {
+      "id": "5",
+      "projetId": "2",
+      "titre": "Identifier les besoins de formation",
+      "description": "Recueillir les besoins des différents départements.",
+      "statut": "terminee",
+      "priorite": "moyenne",
+      "echeance": "2026-09-09",
+      "creeLe": "2026-09-08",
+      "modifieLe": "2026-09-08"
+    },
+    {
+      "id": "6",
+      "projetId": "2",
+      "titre": "Choisir le formateur",
+      "description": "Comparer les profils et sélectionner un formateur.",
+      "statut": "en_cours",
+      "priorite": "haute",
+      "echeance": "2026-09-11",
+      "creeLe": "2026-09-08",
+      "modifieLe": "2026-09-08"
+    },
+    {
+      "id": "7",
+      "projetId": "2",
+      "titre": "Réserver la salle",
+      "description": "Choisir et réserver une salle adaptée à la formation.",
+      "statut": "a_faire",
+      "priorite": "moyenne",
+      "echeance": "2026-09-12",
+      "creeLe": "2026-09-08",
+      "modifieLe": "2026-09-08"
+    },
+    {
+      "id": "8",
+      "projetId": "2",
+      "titre": "Préparer les supports",
+      "description": "Créer les documents et supports nécessaires à la formation.",
+      "statut": "a_faire",
+      "priorite": "basse",
+      "echeance": "2026-09-13",
+      "creeLe": "2026-09-08",
+      "modifieLe": "2026-09-08"
+    },
+    {
+      "id": "9",
+      "projetId": "3",
+      "titre": "Vérifier les présences",
+      "description": "Contrôler les jours de présence et les absences du personnel.",
+      "statut": "terminee",
+      "priorite": "haute",
+      "echeance": "2026-09-09",
+      "creeLe": "2026-09-08",
+      "modifieLe": "2026-09-08"
+    },
+    {
+      "id": "10",
+      "projetId": "3",
+      "titre": "Calculer les primes",
+      "description": "Calculer les primes et indemnités des employés.",
+      "statut": "en_cours",
+      "priorite": "haute",
+      "echeance": "2026-09-10",
+      "creeLe": "2026-09-08",
+      "modifieLe": "2026-09-08"
+    },
+    {
+      "id": "11",
+      "projetId": "3",
+      "titre": "Vérifier les retenues",
+      "description": "Contrôler les retenues appliquées aux employés.",
+      "statut": "a_faire",
+      "priorite": "moyenne",
+      "echeance": "2026-09-11",
+      "creeLe": "2026-09-08",
+      "modifieLe": "2026-09-08"
+    },
+    {
+      "id": "12",
+      "projetId": "3",
+      "titre": "Préparer les bulletins de paie",
+      "description": "Générer et vérifier les bulletins de paie.",
+      "statut": "a_faire",
+      "priorite": "haute",
+      "echeance": "2026-09-12",
+      "creeLe": "2026-09-08",
+      "modifieLe": "2026-09-08"
+    }
+  ]
+}
