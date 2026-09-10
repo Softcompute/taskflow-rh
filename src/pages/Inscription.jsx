@@ -6,11 +6,13 @@ function Inscription() {
     nom: "",
     email: "",
     motDePasse: "",
+    confirmation: "",
     role: "Agent RH",
   });
 
-  const [erreur, setErreur] = useState("");
   const [chargement, setChargement] = useState(false);
+  const [erreur, setErreur] = useState("");
+  const [succes, setSucces] = useState("");
 
   const naviguer = useNavigate();
 
@@ -25,14 +27,38 @@ function Inscription() {
 
   const gererInscription = async (evenement) => {
     evenement.preventDefault();
+
     setErreur("");
+    setSucces("");
+
+    const nomNettoye = formulaire.nom.trim();
+    const emailNettoye = formulaire.email
+      .trim()
+      .toLowerCase();
 
     if (
-      !formulaire.nom.trim() ||
-      !formulaire.email.trim() ||
-      !formulaire.motDePasse.trim()
+      !nomNettoye ||
+      !emailNettoye ||
+      !formulaire.motDePasse ||
+      !formulaire.confirmation
     ) {
       setErreur("Veuillez remplir tous les champs.");
+      return;
+    }
+
+    if (formulaire.motDePasse.length < 4) {
+      setErreur(
+        "Le mot de passe doit contenir au moins 4 caractères."
+      );
+      return;
+    }
+
+    if (
+      formulaire.motDePasse !== formulaire.confirmation
+    ) {
+      setErreur(
+        "Les deux mots de passe ne correspondent pas."
+      );
       return;
     }
 
@@ -41,20 +67,32 @@ function Inscription() {
 
       const verification = await fetch(
         `http://localhost:3000/utilisateurs?email=${encodeURIComponent(
-          formulaire.email
+          emailNettoye
         )}`
       );
 
       if (!verification.ok) {
-        throw new Error("Impossible de vérifier l’adresse e-mail.");
+        throw new Error(
+          "Impossible de vérifier l'adresse e-mail."
+        );
       }
 
-      const utilisateursExistants = await verification.json();
+      const utilisateursExistants =
+        await verification.json();
 
       if (utilisateursExistants.length > 0) {
-        setErreur("Cette adresse e-mail est déjà utilisée.");
+        setErreur(
+          "Un compte utilise déjà cette adresse e-mail."
+        );
         return;
       }
+
+      const nouvelUtilisateur = {
+        nom: nomNettoye,
+        email: emailNettoye,
+        motDePasse: formulaire.motDePasse,
+        role: formulaire.role,
+      };
 
       const reponse = await fetch(
         "http://localhost:3000/utilisateurs",
@@ -63,19 +101,21 @@ function Inscription() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            ...formulaire,
-            nom: formulaire.nom.trim(),
-            email: formulaire.email.trim().toLowerCase(),
-          }),
+          body: JSON.stringify(nouvelUtilisateur),
         }
       );
 
       if (!reponse.ok) {
-        throw new Error("Impossible de créer le compte.");
+        throw new Error(
+          "Impossible de créer votre compte."
+        );
       }
 
-      naviguer("/connexion");
+      setSucces("Compte créé avec succès.");
+
+      setTimeout(() => {
+        naviguer("/connexion");
+      }, 1000);
     } catch (erreurRequete) {
       setErreur(erreurRequete.message);
     } finally {
@@ -86,14 +126,25 @@ function Inscription() {
   return (
     <main className="page-auth">
       <section className="carte-auth">
-        <div className="logo">TF</div>
+        <div className="logo-auth">TF</div>
 
         <h1>Créer un compte</h1>
+
         <p className="sous-titre">
           Inscrivez-vous pour utiliser TaskFlow RH.
         </p>
 
-        {erreur && <div className="message-erreur">{erreur}</div>}
+        {erreur && (
+          <div className="message-erreur">
+            {erreur}
+          </div>
+        )}
+
+        {succes && (
+          <div className="message-succes">
+            {succes}
+          </div>
+        )}
 
         <form onSubmit={gererInscription}>
           <div className="groupe-champ">
@@ -105,12 +156,14 @@ function Inscription() {
               type="text"
               value={formulaire.nom}
               onChange={modifierChamp}
-              placeholder="Votre nom complet"
+              placeholder="Exemple : Gael Ekofo"
             />
           </div>
 
           <div className="groupe-champ">
-            <label htmlFor="email">Adresse e-mail</label>
+            <label htmlFor="email">
+              Adresse e-mail
+            </label>
 
             <input
               id="email"
@@ -123,20 +176,9 @@ function Inscription() {
           </div>
 
           <div className="groupe-champ">
-            <label htmlFor="motDePasse">Mot de passe</label>
-
-            <input
-              id="motDePasse"
-              name="motDePasse"
-              type="password"
-              value={formulaire.motDePasse}
-              onChange={modifierChamp}
-              placeholder="Choisissez un mot de passe"
-            />
-          </div>
-
-          <div className="groupe-champ">
-            <label htmlFor="role">Fonction</label>
+            <label htmlFor="role">
+              Fonction dans le département
+            </label>
 
             <select
               id="role"
@@ -144,10 +186,48 @@ function Inscription() {
               value={formulaire.role}
               onChange={modifierChamp}
             >
-              <option value="Agent RH">Agent RH</option>
-              <option value="Responsable RH">Responsable RH</option>
-              <option value="Gestionnaire RH">Gestionnaire RH</option>
+              <option value="Agent RH">
+                Agent RH
+              </option>
+
+              <option value="Gestionnaire RH">
+                Gestionnaire RH
+              </option>
+
+              <option value="Responsable RH">
+                Responsable RH
+              </option>
             </select>
+          </div>
+
+          <div className="groupe-champ">
+            <label htmlFor="motDePasse">
+              Mot de passe
+            </label>
+
+            <input
+              id="motDePasse"
+              name="motDePasse"
+              type="password"
+              value={formulaire.motDePasse}
+              onChange={modifierChamp}
+              placeholder="Minimum 4 caractères"
+            />
+          </div>
+
+          <div className="groupe-champ">
+            <label htmlFor="confirmation">
+              Confirmer le mot de passe
+            </label>
+
+            <input
+              id="confirmation"
+              name="confirmation"
+              type="password"
+              value={formulaire.confirmation}
+              onChange={modifierChamp}
+              placeholder="Retapez le mot de passe"
+            />
           </div>
 
           <button
@@ -155,13 +235,17 @@ function Inscription() {
             className="bouton-principal"
             disabled={chargement}
           >
-            {chargement ? "Création..." : "Créer mon compte"}
+            {chargement
+              ? "Création en cours..."
+              : "Créer mon compte"}
           </button>
         </form>
 
         <p className="lien-auth">
           Vous avez déjà un compte ?{" "}
-          <Link to="/connexion">Se connecter</Link>
+          <Link to="/connexion">
+            Se connecter
+          </Link>
         </p>
       </section>
     </main>

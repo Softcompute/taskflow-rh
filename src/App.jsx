@@ -11,6 +11,8 @@ import {
 } from "react-router-dom";
 
 import RoutePrivee from "./components/RoutePrivee";
+import MiseEnPagePrivee from "./components/MiseEnPagePrivee";
+
 import Connexion from "./pages/Connexion";
 import Inscription from "./pages/Inscription";
 import Dashboard from "./pages/Dashboard";
@@ -23,7 +25,9 @@ function App() {
     <Routes>
       <Route
         path="/"
-        element={<Navigate to="/dashboard" replace />}
+        element={
+          <Navigate to="/dashboard" replace />
+        }
       />
 
       <Route
@@ -37,31 +41,27 @@ function App() {
       />
 
       <Route
-        path="/dashboard"
         element={
           <RoutePrivee>
-            <Dashboard />
+            <MiseEnPagePrivee />
           </RoutePrivee>
         }
-      />
+      >
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
 
-      <Route
-        path="/projets"
-        element={
-          <RoutePrivee>
-            <Projets />
-          </RoutePrivee>
-        }
-      />
+        <Route
+          path="/projets"
+          element={<Projets />}
+        />
 
-      <Route
-        path="/projets/:id"
-        element={
-          <RoutePrivee>
-            <DetailProjet />
-          </RoutePrivee>
-        }
-      />
+        <Route
+          path="/projets/:id"
+          element={<DetailProjet />}
+        />
+      </Route>
 
       <Route path="*" element={<NonTrouve />} />
     </Routes>

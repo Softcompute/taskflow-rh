@@ -6,6 +6,13 @@
       "email": "gael@taskflow-rh.cd",
       "motDePasse": "1234",
       "role": "Responsable RH"
+    },
+    {
+      "nom": "noella",
+      "email": "noella@taskflow-rh.cd",
+      "motDePasse": "12345",
+      "role": "Agent RH",
+      "id": "nTft0q4bzLQ"
     }
   ],
   "projets": [
@@ -167,5 +174,6 @@
       "creeLe": "2026-09-08",
       "modifieLe": "2026-09-08"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }

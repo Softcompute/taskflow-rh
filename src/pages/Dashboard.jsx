@@ -1,31 +1,49 @@
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function Dashboard() {
-  const { utilisateur, deconnecter } = useAuth();
-  const naviguer = useNavigate();
-
-  const gererDeconnexion = () => {
-    deconnecter();
-    naviguer("/connexion", { replace: true });
-  };
+  const { utilisateur } = useAuth();
 
   return (
-    <main>
-      <h1>Tableau de bord RH</h1>
+    <section>
+      <header className="entete-page">
+        <div>
+          <p className="petit-titre">
+            Tableau de bord
+          </p>
 
-      <p>
-        Bienvenue, <strong>{utilisateur.nom}</strong>
-      </p>
+          <h1>
+            Bonjour, {utilisateur.nom}
+          </h1>
 
-      <p>
-        Fonction : {utilisateur.role}
-      </p>
+          <p>
+            Voici un aperçu des activités du
+            département RH.
+          </p>
+        </div>
+      </header>
 
-      <button type="button" onClick={gererDeconnexion}>
-        Se déconnecter
-      </button>
-    </main>
+      <div className="cartes-statistiques">
+        <article className="carte-statistique">
+          <span>Projets RH</span>
+          <strong>0</strong>
+        </article>
+
+        <article className="carte-statistique">
+          <span>Tâches totales</span>
+          <strong>0</strong>
+        </article>
+
+        <article className="carte-statistique">
+          <span>En cours</span>
+          <strong>0</strong>
+        </article>
+
+        <article className="carte-statistique">
+          <span>Terminées</span>
+          <strong>0 %</strong>
+        </article>
+      </div>
+    </section>
   );
 }
 
