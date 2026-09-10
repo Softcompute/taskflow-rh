@@ -39,6 +39,14 @@
       "description": "Préparation et vérification des éléments de paie du mois.",
       "couleur": "#D97706",
       "creeLe": "2026-09-08"
+    },
+    {
+      "utilisateurId": "1",
+      "nom": "couture",
+      "description": "noella nol's style",
+      "couleur": "#2563eb",
+      "creeLe": "2026-09-10",
+      "id": "dUuDhFIL4hY"
     }
   ],
   "taches": [

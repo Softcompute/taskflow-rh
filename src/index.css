@@ -266,3 +266,269 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+.page-projets {
+  width: 100%;
+}
+
+.entete-projets {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.entete-projets h1 {
+  margin: 5px 0;
+  font-size: 30px;
+}
+
+.entete-projets p {
+  margin: 0;
+  color: #64748b;
+}
+
+.bouton-nouveau {
+  width: auto;
+  flex-shrink: 0;
+}
+
+.formulaire-projet {
+  max-width: 650px;
+  margin-bottom: 30px;
+  padding: 25px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px
+    rgba(15, 23, 42, 0.08);
+}
+
+.entete-formulaire {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.entete-formulaire h2 {
+  margin: 0;
+}
+
+.bouton-fermer {
+  padding: 4px 12px;
+  color: #64748b;
+  font-size: 25px;
+  background: transparent;
+}
+
+.groupe-champ textarea {
+  width: 100%;
+  padding: 12px;
+  font: inherit;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.groupe-champ textarea:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 4px
+    rgba(37, 99, 235, 0.12);
+}
+
+.groupe-champ input[type="color"] {
+  width: 70px;
+  height: 45px;
+  padding: 3px;
+  cursor: pointer;
+}
+
+.actions-formulaire {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.bouton-annuler {
+  color: #334155;
+  background: #e2e8f0;
+}
+
+.grille-projets {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.carte-projet {
+  position: relative;
+  overflow: hidden;
+  padding: 25px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px
+    rgba(15, 23, 42, 0.06);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.carte-projet:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px
+    rgba(15, 23, 42, 0.1);
+}
+
+.couleur-projet {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+}
+
+.entete-carte-projet {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.entete-carte-projet h2 {
+  margin: 0 0 5px;
+  font-size: 19px;
+}
+
+.date-projet {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.nombre-taches {
+  padding: 6px 10px;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  background: #dbeafe;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.description-projet {
+  min-height: 48px;
+  margin: 20px 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.information-avancement {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.barre-progression {
+  height: 8px;
+  overflow: hidden;
+  background: #e2e8f0;
+  border-radius: 20px;
+}
+
+.progression {
+  height: 100%;
+  border-radius: 20px;
+  transition: width 0.4s;
+}
+
+.actions-projet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 22px;
+}
+
+.bouton-voir,
+.bouton-modifier,
+.bouton-supprimer {
+  display: inline-block;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.bouton-voir {
+  color: #ffffff;
+  background: #2563eb;
+}
+
+.bouton-modifier {
+  color: #1e40af;
+  background: #dbeafe;
+}
+
+.bouton-supprimer {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.etat-page {
+  padding: 55px 25px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+}
+
+.etat-page h2 {
+  margin-top: 0;
+}
+
+.etat-page .bouton-principal {
+  width: auto;
+  margin-top: 12px;
+}
+
+@media (max-width: 850px) {
+  .grille-projets {
+    grid-template-columns: 1fr;
+  }
+
+  .entete-projets {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 500px) {
+  .entete-carte-projet {
+    flex-direction: column;
+  }
+
+  .actions-formulaire {
+    flex-direction: column;
+  }
+
+  .actions-formulaire button {
+    width: 100%;
+  }
+}
