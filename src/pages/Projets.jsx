@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import { useAuth } from "../context/AuthContext";
 import CarteProjet from "../components/CarteProjet";
@@ -23,23 +27,41 @@ function Projets() {
   const [projets, setProjets] = useState([]);
   const [taches, setTaches] = useState([]);
 
-  const [formulaire, setFormulaire] =
-    useState(formulaireInitial);
+  const [formulaire, setFormulaire] = useState(
+    formulaireInitial
+  );
 
-  const [projetEnModification, setProjetEnModification] =
-    useState(null);
+  const [
+    projetEnModification,
+    setProjetEnModification,
+  ] = useState(null);
 
-  const [afficherFormulaire, setAfficherFormulaire] =
-    useState(false);
+  const [
+    afficherFormulaire,
+    setAfficherFormulaire,
+  ] = useState(false);
 
-  const [chargement, setChargement] = useState(true);
+  const [chargement, setChargement] =
+    useState(true);
+
   const [enregistrement, setEnregistrement] =
     useState(false);
+
+  const [suppressionId, setSuppressionId] =
+    useState(null);
 
   const [erreur, setErreur] = useState("");
   const [message, setMessage] = useState("");
 
-  const chargerDonnees = async () => {
+  /*
+   * Charge les projets de l'utilisateur connecté
+   * et toutes les tâches.
+   */
+  const chargerDonnees = useCallback(async () => {
+    if (!utilisateur?.id) {
+      return;
+    }
+
     try {
       setChargement(true);
       setErreur("");
@@ -53,16 +75,26 @@ function Projets() {
       setProjets(projetsRecus);
       setTaches(tachesRecues);
     } catch (erreurRequete) {
-      setErreur(erreurRequete.message);
+      setErreur(
+        erreurRequete.message ||
+          "Une erreur est survenue."
+      );
     } finally {
       setChargement(false);
     }
-  };
+  }, [utilisateur?.id]);
 
+  /*
+   * Charge les données à l'ouverture de la page
+   * et lorsque l'utilisateur change.
+   */
   useEffect(() => {
     chargerDonnees();
-  }, [utilisateur.id]);
+  }, [chargerDonnees]);
 
+  /*
+   * Met à jour un champ du formulaire.
+   */
   const modifierChamp = (evenement) => {
     const { name, value } = evenement.target;
 
@@ -72,6 +104,9 @@ function Projets() {
     }));
   };
 
+  /*
+   * Ouvre un formulaire vide pour créer un projet.
+   */
   const ouvrirCreation = () => {
     setProjetEnModification(null);
     setFormulaire(formulaireInitial);
@@ -80,11 +115,15 @@ function Projets() {
     setAfficherFormulaire(true);
   };
 
+  /*
+   * Ouvre le formulaire avec les informations
+   * du projet à modifier.
+   */
   const ouvrirModification = (projet) => {
     setProjetEnModification(projet);
 
     setFormulaire({
-      nom: projet.nom,
+      nom: projet.nom || "",
       description: projet.description || "",
       couleur: projet.couleur || "#2563eb",
     });
@@ -94,24 +133,36 @@ function Projets() {
     setAfficherFormulaire(true);
   };
 
+  /*
+   * Ferme et réinitialise le formulaire.
+   */
   const fermerFormulaire = () => {
     setAfficherFormulaire(false);
     setProjetEnModification(null);
     setFormulaire(formulaireInitial);
   };
 
+  /*
+   * Crée ou modifie un projet.
+   */
   const enregistrerProjet = async (evenement) => {
     evenement.preventDefault();
 
     setErreur("");
     setMessage("");
 
-    if (!formulaire.nom.trim()) {
-      setErreur("Le nom du projet est obligatoire.");
+    const nomNettoye = formulaire.nom.trim();
+    const descriptionNettoyee =
+      formulaire.description.trim();
+
+    if (!nomNettoye) {
+      setErreur(
+        "Le nom du projet est obligatoire."
+      );
       return;
     }
 
-    if (!formulaire.description.trim()) {
+    if (!descriptionNettoyee) {
       setErreur(
         "La description du projet est obligatoire."
       );
@@ -122,41 +173,58 @@ function Projets() {
       setEnregistrement(true);
 
       if (projetEnModification) {
+        /*
+         * Modification avec PATCH.
+         */
         await modifierProjet(
           projetEnModification.id,
           {
-            nom: formulaire.nom.trim(),
-            description:
-              formulaire.description.trim(),
+            nom: nomNettoye,
+            description: descriptionNettoyee,
             couleur: formulaire.couleur,
           }
         );
 
-        setMessage("Projet modifié avec succès.");
+        fermerFormulaire();
+        await chargerDonnees();
+
+        setMessage(
+          "Projet modifié avec succès."
+        );
       } else {
+        /*
+         * Création avec POST.
+         */
         await creerProjet({
           utilisateurId: utilisateur.id,
-          nom: formulaire.nom.trim(),
-          description:
-            formulaire.description.trim(),
+          nom: nomNettoye,
+          description: descriptionNettoyee,
           couleur: formulaire.couleur,
           creeLe: new Date()
             .toISOString()
             .split("T")[0],
         });
 
-        setMessage("Projet créé avec succès.");
-      }
+        fermerFormulaire();
+        await chargerDonnees();
 
-      fermerFormulaire();
-      await chargerDonnees();
+        setMessage(
+          "Projet créé avec succès."
+        );
+      }
     } catch (erreurRequete) {
-      setErreur(erreurRequete.message);
+      setErreur(
+        erreurRequete.message ||
+          "Impossible d'enregistrer le projet."
+      );
     } finally {
       setEnregistrement(false);
     }
   };
 
+  /*
+   * Supprime le projet et toutes ses tâches.
+   */
   const gererSuppression = async (projet) => {
     const confirmation = window.confirm(
       `Voulez-vous vraiment supprimer le projet « ${projet.nom} » et toutes ses tâches ?`
@@ -167,20 +235,29 @@ function Projets() {
     }
 
     try {
+      setSuppressionId(projet.id);
       setErreur("");
       setMessage("");
 
       await supprimerProjetEtTaches(projet.id);
-
-      setMessage("Projet supprimé avec succès.");
       await chargerDonnees();
+
+      setMessage(
+        "Projet et tâches supprimés avec succès."
+      );
     } catch (erreurRequete) {
-      setErreur(erreurRequete.message);
+      setErreur(
+        erreurRequete.message ||
+          "Impossible de supprimer le projet."
+      );
+    } finally {
+      setSuppressionId(null);
     }
   };
 
   return (
     <section className="page-projets">
+      {/* En-tête de la page */}
       <header className="entete-projets">
         <div>
           <p className="petit-titre">
@@ -204,18 +281,29 @@ function Projets() {
         </button>
       </header>
 
+      {/* Message d'erreur */}
       {erreur && (
         <div className="message-erreur">
-          {erreur}
+          <span>{erreur}</span>
+
+          <button
+            type="button"
+            className="bouton-reessayer"
+            onClick={chargerDonnees}
+          >
+            Réessayer
+          </button>
         </div>
       )}
 
+      {/* Message de réussite */}
       {message && (
         <div className="message-succes">
           {message}
         </div>
       )}
 
+      {/* Formulaire de création et modification */}
       {afficherFormulaire && (
         <section className="formulaire-projet">
           <div className="entete-formulaire">
@@ -229,6 +317,7 @@ function Projets() {
               type="button"
               className="bouton-fermer"
               onClick={fermerFormulaire}
+              aria-label="Fermer le formulaire"
             >
               ×
             </button>
@@ -247,6 +336,7 @@ function Projets() {
                 value={formulaire.nom}
                 onChange={modifierChamp}
                 placeholder="Exemple : Recrutement 2026"
+                disabled={enregistrement}
               />
             </div>
 
@@ -262,6 +352,7 @@ function Projets() {
                 onChange={modifierChamp}
                 placeholder="Décrivez l'objectif du projet"
                 rows="4"
+                disabled={enregistrement}
               />
             </div>
 
@@ -270,13 +361,18 @@ function Projets() {
                 Couleur du projet
               </label>
 
-              <input
-                id="couleur"
-                name="couleur"
-                type="color"
-                value={formulaire.couleur}
-                onChange={modifierChamp}
-              />
+              <div className="selection-couleur">
+                <input
+                  id="couleur"
+                  name="couleur"
+                  type="color"
+                  value={formulaire.couleur}
+                  onChange={modifierChamp}
+                  disabled={enregistrement}
+                />
+
+                <span>{formulaire.couleur}</span>
+              </div>
             </div>
 
             <div className="actions-formulaire">
@@ -284,6 +380,7 @@ function Projets() {
                 type="button"
                 className="bouton-annuler"
                 onClick={fermerFormulaire}
+                disabled={enregistrement}
               >
                 Annuler
               </button>
@@ -304,11 +401,13 @@ function Projets() {
         </section>
       )}
 
+      {/* État de chargement */}
       {chargement ? (
         <div className="etat-page">
           <p>Chargement des projets...</p>
         </div>
       ) : projets.length === 0 ? (
+        /* État vide */
         <div className="etat-page">
           <h2>Aucun projet</h2>
 
@@ -325,6 +424,7 @@ function Projets() {
           </button>
         </div>
       ) : (
+        /* Liste des projets */
         <div className="grille-projets">
           {projets.map((projet) => (
             <CarteProjet
@@ -333,6 +433,10 @@ function Projets() {
               taches={taches}
               onModifier={ouvrirModification}
               onSupprimer={gererSuppression}
+              suppressionEnCours={
+                String(suppressionId) ===
+                String(projet.id)
+              }
             />
           ))}
         </div>

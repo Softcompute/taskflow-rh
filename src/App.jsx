@@ -63,7 +63,10 @@ function App() {
         />
       </Route>
 
-      <Route path="*" element={<NonTrouve />} />
+      <Route
+        path="*"
+        element={<NonTrouve />}
+      />
     </Routes>
   );
 }

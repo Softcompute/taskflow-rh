@@ -5,6 +5,7 @@ function CarteProjet({
   taches,
   onModifier,
   onSupprimer,
+  suppressionEnCours,
 }) {
   const tachesProjet = taches.filter(
     (tache) =>
@@ -28,7 +29,10 @@ function CarteProjet({
     <article className="carte-projet">
       <div
         className="couleur-projet"
-        style={{ backgroundColor: projet.couleur }}
+        style={{
+          backgroundColor:
+            projet.couleur || "#2563eb",
+        }}
       />
 
       <div className="entete-carte-projet">
@@ -62,7 +66,8 @@ function CarteProjet({
             className="progression"
             style={{
               width: `${pourcentage}%`,
-              backgroundColor: projet.couleur,
+              backgroundColor:
+                projet.couleur || "#2563eb",
             }}
           />
         </div>
@@ -88,8 +93,11 @@ function CarteProjet({
           type="button"
           className="bouton-supprimer"
           onClick={() => onSupprimer(projet)}
+          disabled={suppressionEnCours}
         >
-          Supprimer
+          {suppressionEnCours
+            ? "Suppression..."
+            : "Supprimer"}
         </button>
       </div>
     </article>
