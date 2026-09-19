@@ -12,6 +12,7 @@ const nomsPriorites = {
 
 function LigneTache({
   tache,
+  onVoir,
   onModifier,
   onSupprimer,
   onChangerStatut,
@@ -37,13 +38,16 @@ function LigneTache({
           <span
             className={`badge-statut statut-${tache.statut}`}
           >
-            {nomsStatuts[tache.statut]}
+            {nomsStatuts[tache.statut] ||
+              tache.statut}
           </span>
 
           <span
             className={`badge-priorite priorite-${tache.priorite}`}
           >
-            {nomsPriorites[tache.priorite]}
+            Priorité :{" "}
+            {nomsPriorites[tache.priorite] ||
+              tache.priorite}
           </span>
         </div>
 
@@ -57,12 +61,16 @@ function LigneTache({
         <div className="dates-tache">
           <span>
             Échéance :{" "}
-            <strong>{tache.echeance}</strong>
+            <strong>
+              {tache.echeance || "Non indiquée"}
+            </strong>
           </span>
 
           <span>
             Modifiée le :{" "}
-            <strong>{tache.modifieLe}</strong>
+            <strong>
+              {tache.modifieLe || "Non indiquée"}
+            </strong>
           </span>
         </div>
       </div>
@@ -70,12 +78,21 @@ function LigneTache({
       <div className="actions-tache">
         <button
           type="button"
+          className="bouton-detail"
+          onClick={() => onVoir(tache)}
+        >
+          Voir le détail
+        </button>
+
+        <button
+          type="button"
           className="bouton-statut"
           onClick={() =>
             onChangerStatut(tache, statutSuivant)
           }
         >
-          Passer à : {nomsStatuts[statutSuivant]}
+          Passer à :{" "}
+          {nomsStatuts[statutSuivant]}
         </button>
 
         <button

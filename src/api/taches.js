@@ -2,7 +2,7 @@ const API_URL = "http://localhost:3000";
 
 export async function obtenirProjet(projetId) {
   const reponse = await fetch(
-    `${API_URL}/projets/${projetId}`
+    `${API_URL}/projets/${encodeURIComponent(projetId)}`
   );
 
   if (!reponse.ok) {
@@ -14,7 +14,9 @@ export async function obtenirProjet(projetId) {
 
 export async function obtenirTachesProjet(projetId) {
   const reponse = await fetch(
-    `${API_URL}/taches?projetId=${projetId}`
+    `${API_URL}/taches?projetId=${encodeURIComponent(
+      projetId
+    )}`
   );
 
   if (!reponse.ok) {
@@ -30,7 +32,7 @@ export async function creerTache(nouvelleTache) {
   const reponse = await fetch(`${API_URL}/taches`, {
     method: "POST",
     headers: {
-      "Content-Type": "/json",
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(nouvelleTache),
   });
@@ -47,7 +49,7 @@ export async function modifierTache(
   modifications
 ) {
   const reponse = await fetch(
-    `${API_URL}/taches/${tacheId}`,
+    `${API_URL}/taches/${encodeURIComponent(tacheId)}`,
     {
       method: "PATCH",
       headers: {
@@ -68,7 +70,7 @@ export async function modifierTache(
 
 export async function supprimerTache(tacheId) {
   const reponse = await fetch(
-    `${API_URL}/taches/${tacheId}`,
+    `${API_URL}/taches/${encodeURIComponent(tacheId)}`,
     {
       method: "DELETE",
     }

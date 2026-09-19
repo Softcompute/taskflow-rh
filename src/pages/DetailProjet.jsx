@@ -1,4 +1,9 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import {
   Link,
   useNavigate,
@@ -7,7 +12,9 @@ import {
 
 import { useAuth } from "../context/AuthContext";
 import useTaches from "../hooks/useTaches";
+
 import LigneTache from "../components/LigneTache";
+import DetailTache from "../components/DetailTache";
 
 import {
   obtenirProjet,
@@ -29,8 +36,12 @@ function DetailProjet() {
   const naviguer = useNavigate();
 
   const [projet, setProjet] = useState(null);
-  const [chargementProjet, setChargementProjet] =
-    useState(true);
+
+  const [
+    chargementProjet,
+    setChargementProjet,
+  ] = useState(true);
+
   const [erreurProjet, setErreurProjet] =
     useState("");
 
@@ -42,11 +53,15 @@ function DetailProjet() {
     chargerTaches,
   } = useTaches(id);
 
-  const [afficherFormulaire, setAfficherFormulaire] =
-    useState(false);
+  const [
+    afficherFormulaire,
+    setAfficherFormulaire,
+  ] = useState(false);
 
-  const [tacheEnModification, setTacheEnModification] =
-    useState(null);
+  const [
+    tacheEnModification,
+    setTacheEnModification,
+  ] = useState(null);
 
   const [formulaire, setFormulaire] =
     useState(formulaireInitial);
@@ -56,6 +71,30 @@ function DetailProjet() {
 
   const [message, setMessage] = useState("");
 
+  /*
+   * États de recherche, filtres et tri.
+   */
+  const [recherche, setRecherche] =
+    useState("");
+
+  const [filtreStatut, setFiltreStatut] =
+    useState("toutes");
+
+  const [filtrePriorite, setFiltrePriorite] =
+    useState("toutes");
+
+  const [tri, setTri] = useState(
+    "echeance-croissante"
+  );
+
+  const [
+    tacheSelectionnee,
+    setTacheSelectionnee,
+  ] = useState(null);
+
+  /*
+   * Chargement du projet.
+   */
   useEffect(() => {
     const chargerProjet = async () => {
       try {
@@ -64,17 +103,23 @@ function DetailProjet() {
 
         const projetRecu = await obtenirProjet(id);
 
-        if (
-          String(projetRecu.utilisateurId) !==
-          String(utilisateur.id)
-        ) {
-          naviguer("/projets", { replace: true });
+        const projetAutorise =
+          String(projetRecu.utilisateurId) ===
+          String(utilisateur.id);
+
+        if (!projetAutorise) {
+          naviguer("/projets", {
+            replace: true,
+          });
+
           return;
         }
 
         setProjet(projetRecu);
       } catch (erreur) {
-        setErreurProjet(erreur.message);
+        setErreurProjet(
+          erreur.message || "Projet introuvable."
+        );
       } finally {
         setChargementProjet(false);
       }
@@ -83,6 +128,77 @@ function DetailProjet() {
     chargerProjet();
   }, [id, utilisateur.id, naviguer]);
 
+  /*
+   * Recherche, filtres et tri combinés.
+   */
+  const tachesFiltrees = useMemo(() => {
+    const texteRecherche = recherche
+      .trim()
+      .toLowerCase();
+
+    const resultat = taches.filter((tache) => {
+      const titre = (tache.titre || "")
+        .toLowerCase();
+
+      const correspondRecherche =
+        titre.includes(texteRecherche);
+
+      const correspondStatut =
+        filtreStatut === "toutes" ||
+        tache.statut === filtreStatut;
+
+      const correspondPriorite =
+        filtrePriorite === "toutes" ||
+        tache.priorite === filtrePriorite;
+
+      return (
+        correspondRecherche &&
+        correspondStatut &&
+        correspondPriorite
+      );
+    });
+
+    return [...resultat].sort(
+      (premiereTache, deuxiemeTache) => {
+        if (tri === "echeance-croissante") {
+          return (
+            new Date(premiereTache.echeance) -
+            new Date(deuxiemeTache.echeance)
+          );
+        }
+
+        if (tri === "echeance-decroissante") {
+          return (
+            new Date(deuxiemeTache.echeance) -
+            new Date(premiereTache.echeance)
+          );
+        }
+
+        if (tri === "creation-recente") {
+          return (
+            new Date(deuxiemeTache.creeLe) -
+            new Date(premiereTache.creeLe)
+          );
+        }
+
+        if (tri === "creation-ancienne") {
+          return (
+            new Date(premiereTache.creeLe) -
+            new Date(deuxiemeTache.creeLe)
+          );
+        }
+
+        return 0;
+      }
+    );
+  }, [
+    taches,
+    recherche,
+    filtreStatut,
+    filtrePriorite,
+    tri,
+  ]);
+
   const modifierChamp = (evenement) => {
     const { name, value } = evenement.target;
 
@@ -90,6 +206,13 @@ function DetailProjet() {
       ...ancienFormulaire,
       [name]: value,
     }));
+  };
+
+  const reinitialiserFiltres = () => {
+    setRecherche("");
+    setFiltreStatut("toutes");
+    setFiltrePriorite("toutes");
+    setTri("echeance-croissante");
   };
 
   const ouvrirCreation = () => {
@@ -104,10 +227,10 @@ function DetailProjet() {
     setTacheEnModification(tache);
 
     setFormulaire({
-      titre: tache.titre,
+      titre: tache.titre || "",
       description: tache.description || "",
-      priorite: tache.priorite,
-      echeance: tache.echeance,
+      priorite: tache.priorite || "moyenne",
+      echeance: tache.echeance || "",
     });
 
     setErreurTaches("");
@@ -127,14 +250,20 @@ function DetailProjet() {
     setErreurTaches("");
     setMessage("");
 
-    if (!formulaire.titre.trim()) {
+    const titreNettoye =
+      formulaire.titre.trim();
+
+    const descriptionNettoyee =
+      formulaire.description.trim();
+
+    if (!titreNettoye) {
       setErreurTaches(
         "Le titre de la tâche est obligatoire."
       );
       return;
     }
 
-    if (!formulaire.description.trim()) {
+    if (!descriptionNettoyee) {
       setErreurTaches(
         "La description est obligatoire."
       );
@@ -159,22 +288,25 @@ function DetailProjet() {
         await modifierTache(
           tacheEnModification.id,
           {
-            titre: formulaire.titre.trim(),
-            description:
-              formulaire.description.trim(),
+            titre: titreNettoye,
+            description: descriptionNettoyee,
             priorite: formulaire.priorite,
             echeance: formulaire.echeance,
             modifieLe: dateActuelle,
           }
         );
 
-        setMessage("Tâche modifiée avec succès.");
+        fermerFormulaire();
+        await chargerTaches();
+
+        setMessage(
+          "Tâche modifiée avec succès."
+        );
       } else {
         await creerTache({
           projetId: id,
-          titre: formulaire.titre.trim(),
-          description:
-            formulaire.description.trim(),
+          titre: titreNettoye,
+          description: descriptionNettoyee,
           statut: "a_faire",
           priorite: formulaire.priorite,
           echeance: formulaire.echeance,
@@ -182,13 +314,18 @@ function DetailProjet() {
           modifieLe: dateActuelle,
         });
 
-        setMessage("Tâche créée avec succès.");
-      }
+        fermerFormulaire();
+        await chargerTaches();
 
-      fermerFormulaire();
-      await chargerTaches();
+        setMessage(
+          "Tâche créée avec succès."
+        );
+      }
     } catch (erreur) {
-      setErreurTaches(erreur.message);
+      setErreurTaches(
+        erreur.message ||
+          "Impossible d’enregistrer la tâche."
+      );
     } finally {
       setEnregistrement(false);
     }
@@ -208,11 +345,23 @@ function DetailProjet() {
       setMessage("");
 
       await supprimerTache(tache.id);
-
-      setMessage("Tâche supprimée avec succès.");
       await chargerTaches();
+
+      if (
+        String(tacheSelectionnee?.id) ===
+        String(tache.id)
+      ) {
+        setTacheSelectionnee(null);
+      }
+
+      setMessage(
+        "Tâche supprimée avec succès."
+      );
     } catch (erreur) {
-      setErreurTaches(erreur.message);
+      setErreurTaches(
+        erreur.message ||
+          "Impossible de supprimer la tâche."
+      );
     }
   };
 
@@ -233,21 +382,37 @@ function DetailProjet() {
         modifieLe: dateActuelle,
       });
 
-      setMessage("Statut modifié avec succès.");
       await chargerTaches();
+
+      setMessage(
+        "Statut modifié avec succès."
+      );
     } catch (erreur) {
-      setErreurTaches(erreur.message);
+      setErreurTaches(
+        erreur.message ||
+          "Impossible de modifier le statut."
+      );
     }
   };
 
   if (chargementProjet) {
-    return <p>Chargement du projet...</p>;
+    return (
+      <div className="etat-page">
+        <p>Chargement du projet...</p>
+      </div>
+    );
   }
 
   if (erreurProjet) {
     return (
-      <div className="message-erreur">
-        {erreurProjet}
+      <div className="etat-page">
+        <div className="message-erreur">
+          {erreurProjet}
+        </div>
+
+        <Link to="/projets">
+          Retour aux projets
+        </Link>
       </div>
     );
   }
@@ -256,6 +421,7 @@ function DetailProjet() {
     return (
       <div className="etat-page">
         <h2>Projet introuvable</h2>
+
         <Link to="/projets">
           Retour aux projets
         </Link>
@@ -304,6 +470,139 @@ function DetailProjet() {
         </div>
       )}
 
+      <section className="outils-taches">
+        <div className="champ-recherche">
+          <label htmlFor="recherche">
+            Rechercher une tâche
+          </label>
+
+          <input
+            id="recherche"
+            type="search"
+            value={recherche}
+            onChange={(evenement) =>
+              setRecherche(evenement.target.value)
+            }
+            placeholder="Rechercher par titre..."
+          />
+        </div>
+
+        <div className="champ-filtre">
+          <label htmlFor="filtreStatut">
+            Statut
+          </label>
+
+          <select
+            id="filtreStatut"
+            value={filtreStatut}
+            onChange={(evenement) =>
+              setFiltreStatut(
+                evenement.target.value
+              )
+            }
+          >
+            <option value="toutes">
+              Toutes
+            </option>
+
+            <option value="a_faire">
+              À faire
+            </option>
+
+            <option value="en_cours">
+              En cours
+            </option>
+
+            <option value="terminee">
+              Terminées
+            </option>
+          </select>
+        </div>
+
+        <div className="champ-filtre">
+          <label htmlFor="filtrePriorite">
+            Priorité
+          </label>
+
+          <select
+            id="filtrePriorite"
+            value={filtrePriorite}
+            onChange={(evenement) =>
+              setFiltrePriorite(
+                evenement.target.value
+              )
+            }
+          >
+            <option value="toutes">
+              Toutes
+            </option>
+
+            <option value="basse">
+              Basse
+            </option>
+
+            <option value="moyenne">
+              Moyenne
+            </option>
+
+            <option value="haute">
+              Haute
+            </option>
+          </select>
+        </div>
+
+        <div className="champ-filtre">
+          <label htmlFor="tri">
+            Trier par
+          </label>
+
+          <select
+            id="tri"
+            value={tri}
+            onChange={(evenement) =>
+              setTri(evenement.target.value)
+            }
+          >
+            <option value="echeance-croissante">
+              Échéance la plus proche
+            </option>
+
+            <option value="echeance-decroissante">
+              Échéance la plus éloignée
+            </option>
+
+            <option value="creation-recente">
+              Création la plus récente
+            </option>
+
+            <option value="creation-ancienne">
+              Création la plus ancienne
+            </option>
+          </select>
+        </div>
+      </section>
+
+      <div className="resume-filtres">
+        <span>
+          {tachesFiltrees.length} tâche
+          {tachesFiltrees.length !== 1
+            ? "s"
+            : ""}{" "}
+          affichée
+          {tachesFiltrees.length !== 1
+            ? "s"
+            : ""}
+        </span>
+
+        <button
+          type="button"
+          className="bouton-reinitialiser"
+          onClick={reinitialiserFiltres}
+        >
+          Réinitialiser les filtres
+        </button>
+      </div>
+
       {afficherFormulaire && (
         <section className="formulaire-tache">
           <div className="entete-formulaire">
@@ -317,6 +616,7 @@ function DetailProjet() {
               type="button"
               className="bouton-fermer"
               onClick={fermerFormulaire}
+              aria-label="Fermer le formulaire"
             >
               ×
             </button>
@@ -335,6 +635,7 @@ function DetailProjet() {
                 value={formulaire.titre}
                 onChange={modifierChamp}
                 placeholder="Exemple : Examiner les CV"
+                disabled={enregistrement}
               />
             </div>
 
@@ -349,7 +650,8 @@ function DetailProjet() {
                 value={formulaire.description}
                 onChange={modifierChamp}
                 rows="4"
-                placeholder="Décrivez la tâche à réaliser"
+                placeholder="Décrivez la tâche"
+                disabled={enregistrement}
               />
             </div>
 
@@ -364,6 +666,7 @@ function DetailProjet() {
                   name="priorite"
                   value={formulaire.priorite}
                   onChange={modifierChamp}
+                  disabled={enregistrement}
                 >
                   <option value="basse">
                     Basse
@@ -390,6 +693,7 @@ function DetailProjet() {
                   type="date"
                   value={formulaire.echeance}
                   onChange={modifierChamp}
+                  disabled={enregistrement}
                 />
               </div>
             </div>
@@ -399,6 +703,7 @@ function DetailProjet() {
                 type="button"
                 className="bouton-annuler"
                 onClick={fermerFormulaire}
+                disabled={enregistrement}
               >
                 Annuler
               </button>
@@ -439,12 +744,30 @@ function DetailProjet() {
             Créer la première tâche
           </button>
         </div>
+      ) : tachesFiltrees.length === 0 ? (
+        <div className="etat-page">
+          <h2>Aucun résultat</h2>
+
+          <p>
+            Aucune tâche ne correspond aux critères
+            sélectionnés.
+          </p>
+
+          <button
+            type="button"
+            className="bouton-reinitialiser"
+            onClick={reinitialiserFiltres}
+          >
+            Effacer les filtres
+          </button>
+        </div>
       ) : (
         <div className="liste-taches">
-          {taches.map((tache) => (
+          {tachesFiltrees.map((tache) => (
             <LigneTache
               key={tache.id}
               tache={tache}
+              onVoir={setTacheSelectionnee}
               onModifier={ouvrirModification}
               onSupprimer={gererSuppression}
               onChangerStatut={
@@ -453,6 +776,15 @@ function DetailProjet() {
             />
           ))}
         </div>
+      )}
+
+      {tacheSelectionnee && (
+        <DetailTache
+          tache={tacheSelectionnee}
+          onFermer={() =>
+            setTacheSelectionnee(null)
+          }
+        />
       )}
     </section>
   );

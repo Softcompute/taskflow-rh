@@ -8,13 +8,19 @@ import { obtenirTachesProjet } from "../api/taches";
 
 function useTaches(projetId) {
   const [taches, setTaches] = useState([]);
-  const [chargementTaches, setChargementTaches] =
-    useState(true);
+
+  const [
+    chargementTaches,
+    setChargementTaches,
+  ] = useState(true);
+
   const [erreurTaches, setErreurTaches] =
     useState("");
 
   const chargerTaches = useCallback(async () => {
     if (!projetId) {
+      setTaches([]);
+      setChargementTaches(false);
       return;
     }
 
@@ -27,7 +33,10 @@ function useTaches(projetId) {
 
       setTaches(donnees);
     } catch (erreur) {
-      setErreurTaches(erreur.message);
+      setErreurTaches(
+        erreur.message ||
+          "Impossible de charger les tâches."
+      );
     } finally {
       setChargementTaches(false);
     }

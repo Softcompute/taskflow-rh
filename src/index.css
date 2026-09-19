@@ -727,3 +727,248 @@ button:disabled {
   background: #1d4ed8;
   text-decoration: none;
 }
+
+
+.page-dashboard {
+  width: 100%;
+}
+
+.entete-page {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.entete-page h1 {
+  margin: 5px 0;
+  font-size: 32px;
+}
+
+.entete-page p {
+  margin: 0;
+  color: #64748b;
+}
+
+.bouton-lien-principal {
+  display: inline-block;
+  padding: 12px 18px;
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  background: #2563eb;
+  border-radius: 9px;
+}
+
+.bouton-lien-principal:hover {
+  color: #ffffff;
+  background: #1d4ed8;
+  text-decoration: none;
+}
+
+.cartes-statistiques {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.carte-statistique {
+  display: grid;
+  gap: 12px;
+  min-height: 130px;
+  padding: 23px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  box-shadow: 0 7px 22px
+    rgba(15, 23, 42, 0.05);
+}
+
+.carte-statistique span {
+  color: #64748b;
+}
+
+.carte-statistique strong {
+  color: #0f172a;
+  font-size: 30px;
+}
+
+.carte-pourcentage {
+  background:
+    linear-gradient(
+      135deg,
+      #eff6ff,
+      #ffffff
+    );
+}
+
+.progression-globale {
+  background: #2563eb;
+}
+
+.sections-dashboard {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 22px;
+  margin-top: 25px;
+}
+
+.bloc-dashboard {
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  box-shadow: 0 7px 22px
+    rgba(15, 23, 42, 0.05);
+}
+
+.titre-bloc-dashboard {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.titre-bloc-dashboard h2 {
+  margin: 0 0 5px;
+  font-size: 20px;
+}
+
+.titre-bloc-dashboard p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.liste-avancements {
+  display: grid;
+  gap: 17px;
+}
+
+.ligne-avancement {
+  padding-bottom: 17px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.ligne-avancement:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.information-projet-dashboard {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.information-projet-dashboard > div:last-child {
+  display: grid;
+  gap: 4px;
+}
+
+.information-projet-dashboard a {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.information-projet-dashboard span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.indicateur-couleur {
+  width: 11px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+
+.progression-projet-dashboard {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.progression-projet-dashboard strong {
+  color: #334155;
+  font-size: 13px;
+}
+
+.liste-urgences {
+  display: grid;
+  gap: 13px;
+}
+
+.tache-urgente {
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+}
+
+.titre-tache-urgente {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.tache-urgente p {
+  margin: 5px 0 12px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.informations-urgence {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.date-urgence {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.etat-dashboard {
+  padding: 30px 15px;
+  text-align: center;
+  color: #64748b;
+}
+
+.bouton-reessayer {
+  margin-left: 15px;
+  padding: 7px 11px;
+  color: #ffffff;
+  background: #dc2626;
+}
+
+@media (max-width: 1100px) {
+  .cartes-statistiques {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .sections-dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .entete-page {
+    flex-direction: column;
+  }
+
+  .cartes-statistiques {
+    grid-template-columns: 1fr;
+  }
+
+  .titre-bloc-dashboard {
+    flex-direction: column;
+  }
+}
