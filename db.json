@@ -13,6 +13,13 @@
       "motDePasse": "12345",
       "role": "Agent RH",
       "id": "nTft0q4bzLQ"
+    },
+    {
+      "nom": "adonis lemba",
+      "email": "ado@taskflow-rh.cd",
+      "motDePasse": "123456",
+      "role": "Gestionnaire RH",
+      "id": "EGD8cT-ruBE"
     }
   ],
   "projets": [
@@ -95,6 +102,14 @@
       "couleur": "#eb6924",
       "creeLe": "2026-09-20",
       "id": "u61-JmbWGOw"
+    },
+    {
+      "utilisateurId": "EGD8cT-ruBE",
+      "nom": "Formation",
+      "description": "Formation informatique",
+      "couleur": "#3beb24",
+      "creeLe": "2026-09-20",
+      "id": "gHy-B4irgTE"
     }
   ],
   "taches": [
@@ -234,11 +249,11 @@
       "projetId": "tKoqYhJ56_k",
       "titre": "Examiner les candidatures",
       "description": "Analyser les CV reçus et choisir les meilleurs candidats.",
-      "statut": "a_faire",
+      "statut": "terminee",
       "priorite": "haute",
       "echeance": "2026-09-19",
       "creeLe": "2026-09-19",
-      "modifieLe": "2026-09-19",
+      "modifieLe": "2026-09-20",
       "id": "Mvidj0X_VF0"
     },
     {
@@ -251,6 +266,17 @@
       "creeLe": "2026-09-20",
       "modifieLe": "2026-09-20",
       "id": "FFJiUn4ys74"
+    },
+    {
+      "projetId": "gHy-B4irgTE",
+      "titre": "Examiner la formation",
+      "description": "Examiner la formation Examiner la formation",
+      "statut": "a_faire",
+      "priorite": "basse",
+      "echeance": "2026-09-28",
+      "creeLe": "2026-09-20",
+      "modifieLe": "2026-09-20",
+      "id": "yXYCS0dtp5Y"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
