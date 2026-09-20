@@ -87,6 +87,14 @@
       "couleur": "#eb8e24",
       "creeLe": "2026-09-20",
       "id": "0-49gJvSzgY"
+    },
+    {
+      "utilisateurId": "1",
+      "nom": "Recrutement des développeurs",
+      "description": "Recrutement des développeurs Recrutement des développeurs Recrutement des développeurs",
+      "couleur": "#eb6924",
+      "creeLe": "2026-09-20",
+      "id": "u61-JmbWGOw"
     }
   ],
   "taches": [
@@ -232,6 +240,17 @@
       "creeLe": "2026-09-19",
       "modifieLe": "2026-09-19",
       "id": "Mvidj0X_VF0"
+    },
+    {
+      "projetId": "u61-JmbWGOw",
+      "titre": "Examiner les candidatures",
+      "description": "Examiner les candidaturesExaminer les candidaturesExaminer les candidaturesExaminer les candidaturesExaminer les candidaturesExaminer les candidaturesExaminer les candidatures",
+      "statut": "a_faire",
+      "priorite": "moyenne",
+      "echeance": "2026-09-28",
+      "creeLe": "2026-09-20",
+      "modifieLe": "2026-09-20",
+      "id": "FFJiUn4ys74"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

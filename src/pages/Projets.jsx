@@ -24,6 +24,7 @@ const formulaireInitial = {
 function Projets() {
   const { utilisateur } = useAuth();
   const utilisateurId = utilisateur?.id;
+
   const [projets, setProjets] = useState([]);
   const [taches, setTaches] = useState([]);
 
@@ -53,50 +54,54 @@ function Projets() {
   const [erreur, setErreur] = useState("");
   const [message, setMessage] = useState("");
 
-  /*
-   * Charge les projets de l'utilisateur connecté
-   * et toutes les tâches.
-   */
-const chargerDonnees = useCallback(async () => {
-  if (!utilisateurId) {
-  return;
-}
+  const chargerDonnees = useCallback(async () => {
+    if (!utilisateurId) {
+      setProjets([]);
+      setTaches([]);
+      setErreur(
+        "Aucun utilisateur connecté."
+      );
+      setChargement(false);
+      return;
+    }
 
-  try {
-    const [projetsRecus, tachesRecues] =
-      await Promise.all([
-        obtenirProjets(utilisateurId),
-        obtenirTaches(),
-      ]);
+    try {
+      setChargement(true);
+      setErreur("");
 
-    setProjets(projetsRecus);
-    setTaches(tachesRecues);
-    setErreur("");
-  } catch (erreurRequete) {
-    setErreur(
-      erreurRequete.message ||
-        "Impossible de charger les projets."
-    );
-  } finally {
-    setChargement(false);
-  }
-}, [utilisateurId]);
+      const [projetsRecus, tachesRecues] =
+        await Promise.all([
+          obtenirProjets(utilisateurId),
+          obtenirTaches(),
+        ]);
 
+      setProjets(
+        Array.isArray(projetsRecus)
+          ? projetsRecus
+          : []
+      );
 
+      setTaches(
+        Array.isArray(tachesRecues)
+          ? tachesRecues
+          : []
+      );
+    } catch (erreurRequete) {
+      setErreur(
+        erreurRequete.message ||
+          "Impossible de charger les projets."
+      );
+    } finally {
+      setChargement(false);
+    }
+  }, [utilisateurId]);
 
-  /*
-   * Charge les données à l'ouverture de la page
-   * et lorsque l'utilisateur change.
-   */
- useEffect(() => {
-  // Chargement des données depuis JSON Server.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  chargerDonnees();
-}, [chargerDonnees]);
+  useEffect(() => {
+    // Chargement initial depuis JSON Server.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    chargerDonnees();
+  }, [chargerDonnees]);
 
-  /*
-   * Met à jour un champ du formulaire.
-   */
   const modifierChamp = (evenement) => {
     const { name, value } = evenement.target;
 
@@ -106,9 +111,6 @@ const chargerDonnees = useCallback(async () => {
     }));
   };
 
-  /*
-   * Ouvre un formulaire vide pour créer un projet.
-   */
   const ouvrirCreation = () => {
     setProjetEnModification(null);
     setFormulaire(formulaireInitial);
@@ -117,10 +119,6 @@ const chargerDonnees = useCallback(async () => {
     setAfficherFormulaire(true);
   };
 
-  /*
-   * Ouvre le formulaire avec les informations
-   * du projet à modifier.
-   */
   const ouvrirModification = (projet) => {
     setProjetEnModification(projet);
 
@@ -135,23 +133,24 @@ const chargerDonnees = useCallback(async () => {
     setAfficherFormulaire(true);
   };
 
-  /*
-   * Ferme et réinitialise le formulaire.
-   */
   const fermerFormulaire = () => {
     setAfficherFormulaire(false);
     setProjetEnModification(null);
     setFormulaire(formulaireInitial);
   };
 
-  /*
-   * Crée ou modifie un projet.
-   */
   const enregistrerProjet = async (evenement) => {
     evenement.preventDefault();
 
     setErreur("");
     setMessage("");
+
+    if (!utilisateurId) {
+      setErreur(
+        "Vous devez être connecté pour enregistrer un projet."
+      );
+      return;
+    }
 
     const nomNettoye = formulaire.nom.trim();
     const descriptionNettoyee =
@@ -175,30 +174,40 @@ const chargerDonnees = useCallback(async () => {
       setEnregistrement(true);
 
       if (projetEnModification) {
+        const projetModifie =
+          await modifierProjet(
+            projetEnModification.id,
+            {
+              nom: nomNettoye,
+              description: descriptionNettoyee,
+              couleur: formulaire.couleur,
+              modifieLe: new Date()
+                .toISOString()
+                .split("T")[0],
+            }
+          );
+
         /*
-         * Modification avec PATCH.
+         * Mettre immédiatement à jour le projet
+         * visible dans l'interface.
          */
-        await modifierProjet(
-          projetEnModification.id,
-          {
-            nom: nomNettoye,
-            description: descriptionNettoyee,
-            couleur: formulaire.couleur,
-          }
+        setProjets((anciensProjets) =>
+          anciensProjets.map((projet) =>
+            String(projet.id) ===
+            String(projetModifie.id)
+              ? projetModifie
+              : projet
+          )
         );
 
         fermerFormulaire();
-        await chargerDonnees();
 
         setMessage(
           "Projet modifié avec succès."
         );
       } else {
-        /*
-         * Création avec POST.
-         */
-        await creerProjet({
-          utilisateurId: utilisateur.id,
+        const nouveauProjet = await creerProjet({
+          utilisateurId: String(utilisateurId),
           nom: nomNettoye,
           description: descriptionNettoyee,
           couleur: formulaire.couleur,
@@ -207,8 +216,16 @@ const chargerDonnees = useCallback(async () => {
             .split("T")[0],
         });
 
+        /*
+         * Ajouter immédiatement le projet retourné
+         * par JSON Server dans l'interface.
+         */
+        setProjets((anciensProjets) => [
+          ...anciensProjets,
+          nouveauProjet,
+        ]);
+
         fermerFormulaire();
-        await chargerDonnees();
 
         setMessage(
           "Projet créé avec succès."
@@ -217,16 +234,13 @@ const chargerDonnees = useCallback(async () => {
     } catch (erreurRequete) {
       setErreur(
         erreurRequete.message ||
-          "Impossible d'enregistrer le projet."
+          "Impossible d’enregistrer le projet."
       );
     } finally {
       setEnregistrement(false);
     }
   };
 
-  /*
-   * Supprime le projet et toutes ses tâches.
-   */
   const gererSuppression = async (projet) => {
     const confirmation = window.confirm(
       `Voulez-vous vraiment supprimer le projet « ${projet.nom} » et toutes ses tâches ?`
@@ -242,7 +256,29 @@ const chargerDonnees = useCallback(async () => {
       setMessage("");
 
       await supprimerProjetEtTaches(projet.id);
-      await chargerDonnees();
+
+      /*
+       * Retirer immédiatement le projet supprimé
+       * de l'interface.
+       */
+      setProjets((anciensProjets) =>
+        anciensProjets.filter(
+          (ancienProjet) =>
+            String(ancienProjet.id) !==
+            String(projet.id)
+        )
+      );
+
+      /*
+       * Retirer aussi ses tâches de l'état local.
+       */
+      setTaches((anciennesTaches) =>
+        anciennesTaches.filter(
+          (tache) =>
+            String(tache.projetId) !==
+            String(projet.id)
+        )
+      );
 
       setMessage(
         "Projet et tâches supprimés avec succès."
@@ -259,7 +295,6 @@ const chargerDonnees = useCallback(async () => {
 
   return (
     <section className="page-projets">
-      {/* En-tête de la page */}
       <header className="entete-projets">
         <div>
           <p className="petit-titre">
@@ -278,14 +313,17 @@ const chargerDonnees = useCallback(async () => {
           type="button"
           className="bouton-principal bouton-nouveau"
           onClick={ouvrirCreation}
+          disabled={!utilisateurId}
         >
           + Nouveau projet
         </button>
       </header>
 
-      {/* Message d'erreur */}
       {erreur && (
-        <div className="message-erreur">
+        <div
+          className="message-erreur"
+          role="alert"
+        >
           <span>{erreur}</span>
 
           <button
@@ -298,14 +336,15 @@ const chargerDonnees = useCallback(async () => {
         </div>
       )}
 
-      {/* Message de réussite */}
       {message && (
-        <div className="message-succes">
+        <div
+          className="message-succes"
+          role="status"
+        >
           {message}
         </div>
       )}
 
-      {/* Formulaire de création et modification */}
       {afficherFormulaire && (
         <section className="formulaire-projet">
           <div className="entete-formulaire">
@@ -320,6 +359,7 @@ const chargerDonnees = useCallback(async () => {
               className="bouton-fermer"
               onClick={fermerFormulaire}
               aria-label="Fermer le formulaire"
+              disabled={enregistrement}
             >
               ×
             </button>
@@ -339,6 +379,7 @@ const chargerDonnees = useCallback(async () => {
                 onChange={modifierChamp}
                 placeholder="Exemple : Recrutement 2026"
                 disabled={enregistrement}
+                required
               />
             </div>
 
@@ -352,9 +393,10 @@ const chargerDonnees = useCallback(async () => {
                 name="description"
                 value={formulaire.description}
                 onChange={modifierChamp}
-                placeholder="Décrivez l'objectif du projet"
+                placeholder="Décrivez l’objectif du projet"
                 rows="4"
                 disabled={enregistrement}
+                required
               />
             </div>
 
@@ -403,13 +445,11 @@ const chargerDonnees = useCallback(async () => {
         </section>
       )}
 
-      {/* État de chargement */}
       {chargement ? (
         <div className="etat-page">
           <p>Chargement des projets...</p>
         </div>
       ) : projets.length === 0 ? (
-        /* État vide */
         <div className="etat-page">
           <h2>Aucun projet</h2>
 
@@ -426,7 +466,6 @@ const chargerDonnees = useCallback(async () => {
           </button>
         </div>
       ) : (
-        /* Liste des projets */
         <div className="grille-projets">
           {projets.map((projet) => (
             <CarteProjet
