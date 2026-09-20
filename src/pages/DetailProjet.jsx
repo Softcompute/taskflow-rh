@@ -1,40 +1,64 @@
 import {
   useEffect,
+  // Mémorise le résultat de la recherche, des filtres et du tri.
   useMemo,
+  // Crée les différents états locaux du composant.
   useState,
 } from "react";
 
 import {
   Link,
+  // Permet de rediriger l’utilisateur avec JavaScript.
   useNavigate,
+  // Récupère l’identifiant du projet présent dans l’URL.
   useParams,
 } from "react-router-dom";
 
+// Donne accès à l’utilisateur actuellement connecté.
 import { useAuth } from "../context/AuthContext";
+// Importe le hook responsable du chargement et du rechargement des tâches.
 import useTaches from "../hooks/useTaches";
 
+// Affiche une tâche dans la liste.
 import LigneTache from "../components/LigneTache";
+// Affiche les informations complètes d’une tâche dans une modale.
 import DetailTache from "../components/DetailTache";
 
 import {
   obtenirProjet,
+  // Enregistre une nouvelle tâche.
   creerTache,
+  // Modifie une tâche existante.
   modifierTache,
+  // Supprime une tâche.
   supprimerTache,
 } from "../api/taches";
 
+// Définit les valeurs utilisées pour réinitialiser le formulaire.
 const formulaireInitial = {
+  // Titre vide au départ.
   titre: "",
+  // Description vide au départ.
   description: "",
+  // Priorité moyenne sélectionnée par défaut.
   priorite: "moyenne",
+  // Aucune date d’échéance au départ.
   echeance: "",
 };
 
+/**
+ * Page de détail d’un projet RH.
+ * Elle gère l’affichage, la recherche, les filtres et le CRUD des tâches.
+ */
 function DetailProjet() {
+  // Récupère l’identifiant placé dans l’adresse /projets/:id.
   const { id } = useParams();
+  // Récupère l’utilisateur connecté.
   const { utilisateur } = useAuth();
+  // Prépare la fonction de redirection.
   const naviguer = useNavigate();
 
+  // Contient le projet chargé depuis JSON Server.
   const [projet, setProjet] = useState(null);
 
   const [
@@ -42,6 +66,7 @@ function DetailProjet() {
     setChargementProjet,
   ] = useState(true);
 
+  // Contient une erreur liée au chargement du projet.
   const [erreurProjet, setErreurProjet] =
     useState("");
 
@@ -51,7 +76,7 @@ function DetailProjet() {
     erreurTaches,
     setErreurTaches,
     chargerTaches,
-  } = useTaches(id);
+  } = useTaches(id); // Charge uniquement les tâches de ce projet.
 
   const [
     afficherFormulaire,
@@ -63,12 +88,14 @@ function DetailProjet() {
     setTacheEnModification,
   ] = useState(null);
 
+  // Contient les valeurs actuelles du formulaire.
   const [formulaire, setFormulaire] =
     useState(formulaireInitial);
 
   const [enregistrement, setEnregistrement] =
     useState(false);
 
+  // Contient le message de réussite affiché à l’utilisateur.
   const [message, setMessage] = useState("");
 
   /*
@@ -96,18 +123,22 @@ function DetailProjet() {
    * Chargement du projet.
    */
   useEffect(() => {
+    // Déclare la fonction asynchrone de chargement.
     const chargerProjet = async () => {
       try {
         setChargementProjet(true);
         setErreurProjet("");
 
+        // Demande le projet correspondant à l’identifiant de l’URL.
         const projetRecu = await obtenirProjet(id);
 
+        // Vérifie que le projet appartient bien à l’utilisateur connecté.
         const projetAutorise =
           String(projetRecu.utilisateurId) ===
           String(utilisateur.id);
 
         if (!projetAutorise) {
+          // Redirige vers les projets si l’accès n’est pas autorisé.
           naviguer("/projets", {
             replace: true,
           });
@@ -115,6 +146,7 @@ function DetailProjet() {
           return;
         }
 
+        // Enregistre le projet autorisé dans l’état React.
         setProjet(projetRecu);
       } catch (erreur) {
         setErreurProjet(
@@ -125,28 +157,35 @@ function DetailProjet() {
       }
     };
 
+    // Lance réellement le chargement défini ci-dessus.
     chargerProjet();
   }, [id, utilisateur.id, naviguer]);
 
   /*
    * Recherche, filtres et tri combinés.
    */
+  // Recalcule la liste uniquement si une dépendance change.
   const tachesFiltrees = useMemo(() => {
+    // Nettoie et met la recherche en minuscules.
     const texteRecherche = recherche
       .trim()
       .toLowerCase();
 
+    // Conserve uniquement les tâches correspondant aux trois critères.
     const resultat = taches.filter((tache) => {
       const titre = (tache.titre || "")
         .toLowerCase();
 
+      // Vérifie si le titre contient le texte recherché.
       const correspondRecherche =
         titre.includes(texteRecherche);
 
+      // Vérifie le filtre du statut.
       const correspondStatut =
         filtreStatut === "toutes" ||
         tache.statut === filtreStatut;
 
+      // Vérifie le filtre de priorité.
       const correspondPriorite =
         filtrePriorite === "toutes" ||
         tache.priorite === filtrePriorite;
@@ -158,6 +197,7 @@ function DetailProjet() {
       );
     });
 
+    // Trie une copie du résultat sans modifier le tableau original.
     return [...resultat].sort(
       (premiereTache, deuxiemeTache) => {
         if (tri === "echeance-croissante") {
@@ -199,6 +239,7 @@ function DetailProjet() {
     tri,
   ]);
 
+  // Met à jour automatiquement le champ de formulaire modifié.
   const modifierChamp = (evenement) => {
     const { name, value } = evenement.target;
 
@@ -208,6 +249,7 @@ function DetailProjet() {
     }));
   };
 
+  // Replace tous les outils de recherche dans leur état initial.
   const reinitialiserFiltres = () => {
     setRecherche("");
     setFiltreStatut("toutes");
@@ -215,6 +257,7 @@ function DetailProjet() {
     setTri("echeance-croissante");
   };
 
+  // Ouvre un formulaire vide pour créer une tâche.
   const ouvrirCreation = () => {
     setTacheEnModification(null);
     setFormulaire(formulaireInitial);
@@ -223,6 +266,7 @@ function DetailProjet() {
     setAfficherFormulaire(true);
   };
 
+  // Ouvre le formulaire rempli avec la tâche choisie.
   const ouvrirModification = (tache) => {
     setTacheEnModification(tache);
 
@@ -238,21 +282,26 @@ function DetailProjet() {
     setAfficherFormulaire(true);
   };
 
+  // Ferme et réinitialise le formulaire.
   const fermerFormulaire = () => {
     setAfficherFormulaire(false);
     setTacheEnModification(null);
     setFormulaire(formulaireInitial);
   };
 
+  // Valide puis crée ou modifie une tâche.
   const enregistrerTache = async (evenement) => {
+    // Empêche le navigateur de recharger la page.
     evenement.preventDefault();
 
     setErreurTaches("");
     setMessage("");
 
+    // Retire les espaces inutiles du titre.
     const titreNettoye =
       formulaire.titre.trim();
 
+    // Retire les espaces inutiles de la description.
     const descriptionNettoyee =
       formulaire.description.trim();
 
@@ -277,6 +326,7 @@ function DetailProjet() {
       return;
     }
 
+    // Produit la date actuelle au format AAAA-MM-JJ.
     const dateActuelle = new Date()
       .toISOString()
       .split("T")[0];
@@ -285,6 +335,7 @@ function DetailProjet() {
       setEnregistrement(true);
 
       if (tacheEnModification) {
+        // Envoie uniquement les nouvelles valeurs à JSON Server.
         await modifierTache(
           tacheEnModification.id,
           {
@@ -303,6 +354,7 @@ function DetailProjet() {
           "Tâche modifiée avec succès."
         );
       } else {
+        // Enregistre une nouvelle tâche liée au projet courant.
         await creerTache({
           projetId: id,
           titre: titreNettoye,
@@ -331,6 +383,7 @@ function DetailProjet() {
     }
   };
 
+  // Demande une confirmation puis supprime la tâche.
   const gererSuppression = async (tache) => {
     const confirmation = window.confirm(
       `Voulez-vous vraiment supprimer la tâche « ${tache.titre} » ?`
@@ -365,6 +418,7 @@ function DetailProjet() {
     }
   };
 
+  // Modifie rapidement le statut depuis LigneTache.
   const gererChangementStatut = async (
     tache,
     nouveauStatut
@@ -395,6 +449,7 @@ function DetailProjet() {
     }
   };
 
+  // Affiche un écran temporaire pendant le chargement du projet.
   if (chargementProjet) {
     return (
       <div className="etat-page">
@@ -403,6 +458,7 @@ function DetailProjet() {
     );
   }
 
+  // Affiche l’erreur si le projet ne peut pas être chargé.
   if (erreurProjet) {
     return (
       <div className="etat-page">
@@ -417,6 +473,7 @@ function DetailProjet() {
     );
   }
 
+  // Gère le cas où aucun projet n’a été retourné.
   if (!projet) {
     return (
       <div className="etat-page">
@@ -438,6 +495,7 @@ function DetailProjet() {
         ← Retour aux projets
       </Link>
 
+      {/* En-tête présentant le projet et le bouton de création. */}
       <header className="entete-taches">
         <div>
           <p className="petit-titre">
@@ -458,19 +516,23 @@ function DetailProjet() {
         </button>
       </header>
 
+      {/* Affiche une éventuelle erreur liée aux tâches. */}
       {erreurTaches && (
         <div className="message-erreur">
           {erreurTaches}
         </div>
       )}
 
+      {/* Affiche un message après une opération réussie. */}
       {message && (
         <div className="message-succes">
           {message}
         </div>
       )}
 
+      {/* Regroupe la recherche, les filtres et le tri. */}
       <section className="outils-taches">
+        {/* Champ de recherche par titre. */}
         <div className="champ-recherche">
           <label htmlFor="recherche">
             Rechercher une tâche
@@ -487,6 +549,7 @@ function DetailProjet() {
           />
         </div>
 
+        {/* Filtre des tâches par statut. */}
         <div className="champ-filtre">
           <label htmlFor="filtreStatut">
             Statut
@@ -582,6 +645,7 @@ function DetailProjet() {
         </div>
       </section>
 
+      {/* Résume le nombre de résultats et permet d’effacer les filtres. */}
       <div className="resume-filtres">
         <span>
           {tachesFiltrees.length} tâche
@@ -603,6 +667,7 @@ function DetailProjet() {
         </button>
       </div>
 
+      {/* Affiche le formulaire uniquement lorsqu’il est ouvert. */}
       {afficherFormulaire && (
         <section className="formulaire-tache">
           <div className="entete-formulaire">
@@ -622,6 +687,7 @@ function DetailProjet() {
             </button>
           </div>
 
+          {/* Déclenche enregistrerTache lors de la soumission. */}
           <form onSubmit={enregistrerTache}>
             <div className="groupe-champ">
               <label htmlFor="titre">
@@ -724,6 +790,7 @@ function DetailProjet() {
         </section>
       )}
 
+      {/* Choisit entre chargement, état vide, aucun résultat et liste. */}
       {chargementTaches ? (
         <div className="etat-page">
           <p>Chargement des tâches...</p>
@@ -763,6 +830,7 @@ function DetailProjet() {
         </div>
       ) : (
         <div className="liste-taches">
+          {/* Transforme chaque tâche filtrée en composant LigneTache. */}
           {tachesFiltrees.map((tache) => (
             <LigneTache
               key={tache.id}
@@ -778,6 +846,7 @@ function DetailProjet() {
         </div>
       )}
 
+      {/* Ouvre la modale lorsqu’une tâche a été sélectionnée. */}
       {tacheSelectionnee && (
         <DetailTache
           tache={tacheSelectionnee}
@@ -790,4 +859,5 @@ function DetailProjet() {
   );
 }
 
+// Rend la page importable dans App.jsx.
 export default DetailProjet;

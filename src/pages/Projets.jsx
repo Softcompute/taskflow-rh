@@ -1,33 +1,53 @@
 import {
   useCallback,
+  // Lance le chargement initial après le rendu.
   useEffect,
+  // Gère les états locaux de la page.
   useState,
 } from "react";
 
+// Donne accès à l’utilisateur actuellement connecté.
 import { useAuth } from "../context/AuthContext";
+// Importe la carte utilisée pour afficher chaque projet.
 import CarteProjet from "../components/CarteProjet";
 
 import {
   obtenirProjets,
+  // Récupère les tâches utilisées pour calculer les progressions.
   obtenirTaches,
+  // Enregistre un nouveau projet.
   creerProjet,
+  // Modifie un projet existant.
   modifierProjet,
+  // Supprime un projet et les tâches qui lui appartiennent.
   supprimerProjetEtTaches,
 } from "../api/projets";
 
+// Définit les valeurs utilisées pour réinitialiser le formulaire.
 const formulaireInitial = {
+  // Le nom est vide au départ.
   nom: "",
+  // La description est vide au départ.
   description: "",
+  // Le bleu est la couleur sélectionnée par défaut.
   couleur: "#2563eb",
 };
 
+/**
+ * Page responsable de l’affichage et du CRUD des projets RH.
+ */
 function Projets() {
+  // Récupère l’utilisateur connecté depuis AuthContext.
   const { utilisateur } = useAuth();
+  // Récupère son identifiant sans provoquer d’erreur s’il est absent.
   const utilisateurId = utilisateur?.id;
 
+  // Contient les projets affichés dans la page.
   const [projets, setProjets] = useState([]);
+  // Contient les tâches nécessaires aux calculs des cartes.
   const [taches, setTaches] = useState([]);
 
+  // Contient les valeurs actuelles du formulaire.
   const [formulaire, setFormulaire] = useState(
     formulaireInitial
   );
@@ -51,12 +71,18 @@ function Projets() {
   const [suppressionId, setSuppressionId] =
     useState(null);
 
+  // Contient un éventuel message d’erreur.
   const [erreur, setErreur] = useState("");
+  // Contient le message affiché après une opération réussie.
   const [message, setMessage] = useState("");
 
+  // Charge ou recharge les projets et les tâches depuis l’API.
   const chargerDonnees = useCallback(async () => {
+    // Arrête le chargement lorsqu’aucun utilisateur n’est connecté.
     if (!utilisateurId) {
+      // Réinitialise la liste des projets.
       setProjets([]);
+      // Réinitialise également la liste des tâches.
       setTaches([]);
       setErreur(
         "Aucun utilisateur connecté."
@@ -69,6 +95,7 @@ function Projets() {
       setChargement(true);
       setErreur("");
 
+      // Exécute les deux requêtes en parallèle pour gagner du temps.
       const [projetsRecus, tachesRecues] =
         await Promise.all([
           obtenirProjets(utilisateurId),
@@ -96,13 +123,16 @@ function Projets() {
     }
   }, [utilisateurId]);
 
+  // Exécute chargerDonnees à l’ouverture ou au changement d’utilisateur.
   useEffect(() => {
     // Chargement initial depuis JSON Server.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     chargerDonnees();
   }, [chargerDonnees]);
 
+  // Met à jour automatiquement le champ de formulaire modifié.
   const modifierChamp = (evenement) => {
+    // Récupère le nom du champ et sa nouvelle valeur.
     const { name, value } = evenement.target;
 
     setFormulaire((ancienFormulaire) => ({
@@ -111,6 +141,7 @@ function Projets() {
     }));
   };
 
+  // Ouvre un formulaire vide pour créer un projet.
   const ouvrirCreation = () => {
     setProjetEnModification(null);
     setFormulaire(formulaireInitial);
@@ -119,6 +150,7 @@ function Projets() {
     setAfficherFormulaire(true);
   };
 
+  // Ouvre le formulaire rempli avec le projet choisi.
   const ouvrirModification = (projet) => {
     setProjetEnModification(projet);
 
@@ -133,13 +165,16 @@ function Projets() {
     setAfficherFormulaire(true);
   };
 
+  // Ferme le formulaire et réinitialise son contenu.
   const fermerFormulaire = () => {
     setAfficherFormulaire(false);
     setProjetEnModification(null);
     setFormulaire(formulaireInitial);
   };
 
+  // Valide le formulaire puis crée ou modifie le projet.
   const enregistrerProjet = async (evenement) => {
+    // Empêche le rechargement automatique du navigateur.
     evenement.preventDefault();
 
     setErreur("");
@@ -152,7 +187,9 @@ function Projets() {
       return;
     }
 
+    // Retire les espaces inutiles autour du nom.
     const nomNettoye = formulaire.nom.trim();
+    // Retire les espaces inutiles autour de la description.
     const descriptionNettoyee =
       formulaire.description.trim();
 
@@ -173,7 +210,9 @@ function Projets() {
     try {
       setEnregistrement(true);
 
+      // Choisit PATCH si un projet est en cours de modification.
       if (projetEnModification) {
+        // Envoie les nouvelles informations à JSON Server.
         const projetModifie =
           await modifierProjet(
             projetEnModification.id,
@@ -191,7 +230,9 @@ function Projets() {
          * Mettre immédiatement à jour le projet
          * visible dans l'interface.
          */
-        setProjets((anciensProjets) =>
+        // Remplace immédiatement le projet dans l’état local.
+        // Retire immédiatement le projet de la liste visible.
+      setProjets((anciensProjets) =>
           anciensProjets.map((projet) =>
             String(projet.id) ===
             String(projetModifie.id)
@@ -206,7 +247,9 @@ function Projets() {
           "Projet modifié avec succès."
         );
       } else {
+        // Envoie le nouveau projet à JSON Server.
         const nouveauProjet = await creerProjet({
+          // Associe le projet à l’utilisateur connecté.
           utilisateurId: String(utilisateurId),
           nom: nomNettoye,
           description: descriptionNettoyee,
@@ -220,6 +263,7 @@ function Projets() {
          * Ajouter immédiatement le projet retourné
          * par JSON Server dans l'interface.
          */
+        // Ajoute immédiatement le projet retourné dans l’interface.
         setProjets((anciensProjets) => [
           ...anciensProjets,
           nouveauProjet,
@@ -241,7 +285,9 @@ function Projets() {
     }
   };
 
+  // Demande une confirmation puis supprime le projet et ses tâches.
   const gererSuppression = async (projet) => {
+    // Ouvre une boîte de dialogue de confirmation.
     const confirmation = window.confirm(
       `Voulez-vous vraiment supprimer le projet « ${projet.nom} » et toutes ses tâches ?`
     );
@@ -255,6 +301,7 @@ function Projets() {
       setErreur("");
       setMessage("");
 
+      // Supprime les données correspondantes dans JSON Server.
       await supprimerProjetEtTaches(projet.id);
 
       /*
@@ -272,6 +319,7 @@ function Projets() {
       /*
        * Retirer aussi ses tâches de l'état local.
        */
+      // Retire également ses tâches de l’état local.
       setTaches((anciennesTaches) =>
         anciennesTaches.filter(
           (tache) =>
@@ -295,6 +343,7 @@ function Projets() {
 
   return (
     <section className="page-projets">
+      {/* En-tête contenant le titre et le bouton de création. */}
       <header className="entete-projets">
         <div>
           <p className="petit-titre">
@@ -319,6 +368,7 @@ function Projets() {
         </button>
       </header>
 
+      {/* Affiche un message et un bouton Réessayer en cas d’erreur. */}
       {erreur && (
         <div
           className="message-erreur"
@@ -336,6 +386,7 @@ function Projets() {
         </div>
       )}
 
+      {/* Affiche la confirmation d’une opération réussie. */}
       {message && (
         <div
           className="message-succes"
@@ -345,6 +396,7 @@ function Projets() {
         </div>
       )}
 
+      {/* Affiche le formulaire uniquement lorsqu’il est ouvert. */}
       {afficherFormulaire && (
         <section className="formulaire-projet">
           <div className="entete-formulaire">
@@ -365,7 +417,9 @@ function Projets() {
             </button>
           </div>
 
+          {/* Déclenche enregistrerProjet lors de la soumission. */}
           <form onSubmit={enregistrerProjet}>
+            {/* Champ utilisé pour saisir le nom du projet. */}
             <div className="groupe-champ">
               <label htmlFor="nom">
                 Nom du projet
@@ -419,6 +473,7 @@ function Projets() {
               </div>
             </div>
 
+            {/* Boutons permettant d’annuler ou d’enregistrer. */}
             <div className="actions-formulaire">
               <button
                 type="button"
@@ -445,6 +500,7 @@ function Projets() {
         </section>
       )}
 
+      {/* Choisit entre le chargement, l’état vide et la grille. */}
       {chargement ? (
         <div className="etat-page">
           <p>Chargement des projets...</p>
@@ -467,6 +523,7 @@ function Projets() {
         </div>
       ) : (
         <div className="grille-projets">
+          {/* Transforme chaque projet en composant CarteProjet. */}
           {projets.map((projet) => (
             <CarteProjet
               key={projet.id}
@@ -486,4 +543,5 @@ function Projets() {
   );
 }
 
+// Rend la page disponible dans App.jsx.
 export default Projets;
