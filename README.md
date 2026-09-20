@@ -1,16 +1,41 @@
-# React + Vite
+# TaskFlow RH
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+TaskFlow RH est une application de gestion des projets et des tâches du département des Ressources humaines.
 
-Currently, two official plugins are available:
+Le projet a été réalisé individuellement avec React, React Router et JSON Server.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Fonctionnalités
 
-## React Compiler
+- Inscription d’un utilisateur
+- Connexion et déconnexion
+- Conservation de la session avec localStorage
+- Protection des routes privées
+- Création, modification et suppression des projets
+- Création, modification et suppression des tâches
+- Changement rapide du statut d’une tâche
+- Recherche d’une tâche par titre
+- Filtrage par statut
+- Filtrage par priorité
+- Tri par échéance ou date de création
+- Affichage du détail d’une tâche
+- Tableau de bord avec statistiques calculées
+- Affichage de l’avancement des projets
+- Affichage des tâches urgentes
+- Interface responsive
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Technologies utilisées
 
-## Expanding the Oxlint configuration
+- React
+- Vite
+- React Router DOM
+- JSON Server
+- JavaScript
+- CSS
+- Git et GitHub
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Installation
+
+Clonez le dépôt :
+
+```bash
+git clone https://github.com/Softcompute/taskflow-rh.git

@@ -1,7 +1,5 @@
 import {
-  useCallback,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 
@@ -32,6 +30,8 @@ const nomsPriorites = {
 function Dashboard() {
   const { utilisateur } = useAuth();
 
+  const utilisateurId = utilisateur?.id;
+
   const [projets, setProjets] = useState([]);
   const [taches, setTaches] = useState([]);
 
@@ -40,57 +40,74 @@ function Dashboard() {
 
   const [erreur, setErreur] = useState("");
 
-  const chargerDashboard = useCallback(
-    async () => {
-      if (!utilisateur?.id) {
-        return;
-      }
+  const [rechargement, setRechargement] =
+    useState(0);
 
-      try {
-        setChargement(true);
-        setErreur("");
+  /*
+   * Charge les projets et les tâches
+   * de l’utilisateur connecté.
+   */
+  useEffect(() => {
+    if (!utilisateurId) {
+      return undefined;
+    }
 
-        const donnees =
-          await obtenirDonneesDashboard(
-            utilisateur.id
-          );
+    let composantActif = true;
+
+    obtenirDonneesDashboard(utilisateurId)
+      .then((donnees) => {
+        if (!composantActif) {
+          return;
+        }
 
         setProjets(donnees.projets);
         setTaches(donnees.taches);
-      } catch (erreurRequete) {
+        setErreur("");
+      })
+      .catch((erreurRequete) => {
+        if (!composantActif) {
+          return;
+        }
+
         setErreur(
           erreurRequete.message ||
             "Impossible de charger le tableau de bord."
         );
-      } finally {
-        setChargement(false);
-      }
-    },
-    [utilisateur?.id]
+      })
+      .finally(() => {
+        if (composantActif) {
+          setChargement(false);
+        }
+      });
+
+    /*
+     * Cette fonction empêche React de modifier
+     * l’état si la page est fermée avant la fin
+     * de la requête.
+     */
+    return () => {
+      composantActif = false;
+    };
+  }, [utilisateurId, rechargement]);
+
+  /*
+   * Les statistiques sont calculées à chaque
+   * rendu à partir des tâches reçues.
+   */
+  const statistiques =
+    calculerStatistiques(taches);
+
+  const projetsAvecAvancement = projets.map(
+    (projet) =>
+      calculerAvancementProjet(projet, taches)
   );
 
-  useEffect(() => {
-    chargerDashboard();
-  }, [chargerDashboard]);
+  const tachesUrgentes =
+    obtenirTachesUrgentes(taches, 5);
 
-  const statistiques = useMemo(
-    () => calculerStatistiques(taches),
-    [taches]
-  );
-
-  const projetsAvecAvancement = useMemo(
-    () =>
-      projets.map((projet) =>
-        calculerAvancementProjet(projet, taches)
-      ),
-    [projets, taches]
-  );
-
-  const tachesUrgentes = useMemo(
-    () => obtenirTachesUrgentes(taches, 5),
-    [taches]
-  );
-
+  /*
+   * Retrouve le nom du projet d’une tâche.
+   */
   const obtenirNomProjet = (projetId) => {
     const projet = projets.find(
       (element) =>
@@ -100,6 +117,21 @@ function Dashboard() {
     return projet?.nom || "Projet inconnu";
   };
 
+  /*
+   * Relance manuellement le chargement.
+   */
+  const reessayerChargement = () => {
+    setChargement(true);
+    setErreur("");
+
+    setRechargement(
+      (ancienneValeur) => ancienneValeur + 1
+    );
+  };
+
+  /*
+   * État de chargement.
+   */
   if (chargement) {
     return (
       <div className="etat-page">
@@ -117,7 +149,8 @@ function Dashboard() {
           </p>
 
           <h1>
-            Bonjour, {utilisateur.nom}
+            Bonjour,{" "}
+            {utilisateur?.nom || "Utilisateur"}
           </h1>
 
           <p>
@@ -141,7 +174,7 @@ function Dashboard() {
           <button
             type="button"
             className="bouton-reessayer"
-            onClick={chargerDashboard}
+            onClick={reessayerChargement}
           >
             Réessayer
           </button>
@@ -153,16 +186,23 @@ function Dashboard() {
           <div className="cartes-statistiques">
             <article className="carte-statistique">
               <span>Projets RH</span>
-              <strong>{projets.length}</strong>
+
+              <strong>
+                {projets.length}
+              </strong>
             </article>
 
             <article className="carte-statistique">
               <span>Tâches totales</span>
-              <strong>{statistiques.total}</strong>
+
+              <strong>
+                {statistiques.total}
+              </strong>
             </article>
 
             <article className="carte-statistique">
               <span>À faire</span>
+
               <strong>
                 {statistiques.aFaire}
               </strong>
@@ -170,6 +210,7 @@ function Dashboard() {
 
             <article className="carte-statistique">
               <span>En cours</span>
+
               <strong>
                 {statistiques.enCours}
               </strong>
@@ -177,6 +218,7 @@ function Dashboard() {
 
             <article className="carte-statistique">
               <span>Terminées</span>
+
               <strong>
                 {statistiques.terminees}
               </strong>
@@ -343,7 +385,8 @@ function Dashboard() {
                         >
                           {nomsPriorites[
                             tache.priorite
-                          ] || tache.priorite}
+                          ] ||
+                            tache.priorite}
                         </span>
 
                         <span
@@ -351,7 +394,8 @@ function Dashboard() {
                         >
                           {nomsStatuts[
                             tache.statut
-                          ] || tache.statut}
+                          ] ||
+                            tache.statut}
                         </span>
 
                         <span className="date-urgence">

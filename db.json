@@ -55,6 +55,38 @@
       "couleur": "#eb4b24",
       "creeLe": "2026-09-15",
       "id": "KsN8f10ivgY"
+    },
+    {
+      "utilisateurId": "nTft0q4bzLQ",
+      "nom": "Recrutement des COUT",
+      "description": "Organisation du recrutement des développeurs pour l’entreprise.",
+      "couleur": "#2563eb",
+      "creeLe": "2026-09-19",
+      "id": "tKoqYhJ56_k"
+    },
+    {
+      "utilisateurId": "1",
+      "nom": "Paiement",
+      "description": "Paiement des agen",
+      "couleur": "#2563eb",
+      "creeLe": "2026-09-20",
+      "id": "X2wa_MGRN4A"
+    },
+    {
+      "utilisateurId": "1",
+      "nom": "Paiement",
+      "description": "Paiement materiel",
+      "couleur": "#2563eb",
+      "creeLe": "2026-09-20",
+      "id": "1SQJ6sOKBOk"
+    },
+    {
+      "utilisateurId": "1",
+      "nom": "Recrutement des développeursFFF",
+      "description": "Recrutement des développeurs Recrutement des développeurs",
+      "couleur": "#eb8e24",
+      "creeLe": "2026-09-20",
+      "id": "0-49gJvSzgY"
     }
   ],
   "taches": [
@@ -189,6 +221,17 @@
       "echeance": "2026-09-12",
       "creeLe": "2026-09-08",
       "modifieLe": "2026-09-08"
+    },
+    {
+      "projetId": "tKoqYhJ56_k",
+      "titre": "Examiner les candidatures",
+      "description": "Analyser les CV reçus et choisir les meilleurs candidats.",
+      "statut": "a_faire",
+      "priorite": "haute",
+      "echeance": "2026-09-19",
+      "creeLe": "2026-09-19",
+      "modifieLe": "2026-09-19",
+      "id": "Mvidj0X_VF0"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

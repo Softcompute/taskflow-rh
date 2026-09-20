@@ -23,7 +23,7 @@ const formulaireInitial = {
 
 function Projets() {
   const { utilisateur } = useAuth();
-
+  const utilisateurId = utilisateur?.id;
   const [projets, setProjets] = useState([]);
   const [taches, setTaches] = useState([]);
 
@@ -57,40 +57,42 @@ function Projets() {
    * Charge les projets de l'utilisateur connecté
    * et toutes les tâches.
    */
-  const chargerDonnees = useCallback(async () => {
-    if (!utilisateur?.id) {
-      return;
-    }
+const chargerDonnees = useCallback(async () => {
+  if (!utilisateurId) {
+  return;
+}
 
-    try {
-      setChargement(true);
-      setErreur("");
+  try {
+    const [projetsRecus, tachesRecues] =
+      await Promise.all([
+        obtenirProjets(utilisateurId),
+        obtenirTaches(),
+      ]);
 
-      const [projetsRecus, tachesRecues] =
-        await Promise.all([
-          obtenirProjets(utilisateur.id),
-          obtenirTaches(),
-        ]);
+    setProjets(projetsRecus);
+    setTaches(tachesRecues);
+    setErreur("");
+  } catch (erreurRequete) {
+    setErreur(
+      erreurRequete.message ||
+        "Impossible de charger les projets."
+    );
+  } finally {
+    setChargement(false);
+  }
+}, [utilisateurId]);
 
-      setProjets(projetsRecus);
-      setTaches(tachesRecues);
-    } catch (erreurRequete) {
-      setErreur(
-        erreurRequete.message ||
-          "Une erreur est survenue."
-      );
-    } finally {
-      setChargement(false);
-    }
-  }, [utilisateur?.id]);
+
 
   /*
    * Charge les données à l'ouverture de la page
    * et lorsque l'utilisateur change.
    */
-  useEffect(() => {
-    chargerDonnees();
-  }, [chargerDonnees]);
+ useEffect(() => {
+  // Chargement des données depuis JSON Server.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  chargerDonnees();
+}, [chargerDonnees]);
 
   /*
    * Met à jour un champ du formulaire.

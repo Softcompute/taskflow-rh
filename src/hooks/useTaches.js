@@ -17,6 +17,10 @@ function useTaches(projetId) {
   const [erreurTaches, setErreurTaches] =
     useState("");
 
+  /*
+   * Cette fonction permet de recharger les tâches
+   * après une création, modification ou suppression.
+   */
   const chargerTaches = useCallback(async () => {
     if (!projetId) {
       setTaches([]);
@@ -42,9 +46,45 @@ function useTaches(projetId) {
     }
   }, [projetId]);
 
+  /*
+   * Chargement initial et changement de projet.
+   */
   useEffect(() => {
-    chargerTaches();
-  }, [chargerTaches]);
+    if (!projetId) {
+      return undefined;
+    }
+
+    let composantActif = true;
+
+    obtenirTachesProjet(projetId)
+      .then((donnees) => {
+        if (!composantActif) {
+          return;
+        }
+
+        setTaches(donnees);
+        setErreurTaches("");
+      })
+      .catch((erreur) => {
+        if (!composantActif) {
+          return;
+        }
+
+        setErreurTaches(
+          erreur.message ||
+            "Impossible de charger les tâches."
+        );
+      })
+      .finally(() => {
+        if (composantActif) {
+          setChargementTaches(false);
+        }
+      });
+
+    return () => {
+      composantActif = false;
+    };
+  }, [projetId]);
 
   return {
     taches,

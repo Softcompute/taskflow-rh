@@ -168,3 +168,122 @@ h1 {
     padding: 25px;
   }
 }
+
+.page-non-trouve {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 25px;
+  background: #f8fafc;
+}
+
+.carte-non-trouve {
+  width: 100%;
+  max-width: 550px;
+  padding: 45px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px
+    rgba(15, 23, 42, 0.1);
+}
+
+.numero-erreur {
+  display: block;
+  color: #2563eb;
+  font-size: 75px;
+  font-weight: 800;
+}
+
+.carte-non-trouve h1 {
+  margin: 5px 0 12px;
+}
+
+.carte-non-trouve p {
+  margin-bottom: 28px;
+  color: #64748b;
+}
+
+@media (max-width: 900px) {
+  .mise-en-page {
+    display: block;
+  }
+
+  .barre-laterale {
+    min-height: auto;
+    position: static;
+    padding: 18px;
+  }
+
+  .marque {
+    margin-bottom: 20px;
+  }
+
+  .navigation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .navigation .lien {
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+  }
+
+  .profil-barre {
+    display: grid;
+    grid-template-columns:
+      auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 15px;
+  }
+
+  .avatar {
+    margin-bottom: 0;
+  }
+
+  .bouton-deconnexion {
+    width: auto;
+    margin-top: 0;
+  }
+
+  .contenu-principal {
+    padding: 25px;
+  }
+}
+
+@media (max-width: 550px) {
+  .contenu-principal {
+    padding: 18px;
+  }
+
+  .profil-barre {
+    grid-template-columns:
+      auto minmax(0, 1fr);
+  }
+
+  .bouton-deconnexion {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .entete-projets,
+  .entete-taches,
+  .entete-page {
+    flex-direction: column;
+  }
+
+  .bouton-nouveau,
+  .bouton-lien-principal {
+    width: 100%;
+    text-align: center;
+  }
+
+  .carte-non-trouve {
+    padding: 30px 20px;
+  }
+}

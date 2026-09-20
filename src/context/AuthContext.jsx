@@ -1,31 +1,42 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useState,
 } from "react";
 
 const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-  const [utilisateur, setUtilisateur] = useState(null);
-  const [chargementAuth, setChargementAuth] = useState(true);
-
-  useEffect(() => {
-    const utilisateurSauvegarde = localStorage.getItem(
+function obtenirUtilisateurSauvegarde() {
+  const utilisateurSauvegarde =
+    localStorage.getItem(
       "taskflow_utilisateur"
     );
 
-    if (utilisateurSauvegarde) {
-      try {
-        setUtilisateur(JSON.parse(utilisateurSauvegarde));
-      } catch {
-        localStorage.removeItem("taskflow_utilisateur");
-      }
-    }
+  if (!utilisateurSauvegarde) {
+    return null;
+  }
 
-    setChargementAuth(false);
-  }, []);
+  try {
+    return JSON.parse(utilisateurSauvegarde);
+  } catch {
+    localStorage.removeItem(
+      "taskflow_utilisateur"
+    );
+
+    return null;
+  }
+}
+
+export function AuthProvider({ children }) {
+  const [utilisateur, setUtilisateur] =
+    useState(obtenirUtilisateurSauvegarde);
+
+  /*
+   * La lecture de localStorage est effectuée
+   * directement lors de l’initialisation.
+   * Il n’y a donc plus de chargement asynchrone.
+   */
+  const chargementAuth = false;
 
   const connecter = (utilisateurConnecte) => {
     const utilisateurSansMotDePasse = {
@@ -39,13 +50,18 @@ export function AuthProvider({ children }) {
 
     localStorage.setItem(
       "taskflow_utilisateur",
-      JSON.stringify(utilisateurSansMotDePasse)
+      JSON.stringify(
+        utilisateurSansMotDePasse
+      )
     );
   };
 
   const deconnecter = () => {
     setUtilisateur(null);
-    localStorage.removeItem("taskflow_utilisateur");
+
+    localStorage.removeItem(
+      "taskflow_utilisateur"
+    );
   };
 
   return (

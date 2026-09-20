@@ -1,0 +1,35 @@
+
+> taskflow-rh@0.0.0 lint
+> oxlint
+
+
+  ! react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+    ,-[src/context/AuthContext.jsx:65:17]
+ 64 | 
+ 65 | export function useAuth() {
+    :                 ^^^^^^^
+ 66 |   const contexte = useContext(AuthContext);
+    `----
+
+  ! react(set-state-in-effect): Calling setState synchronously within an effect can trigger cascading renders
+    ,-[src/context/AuthContext.jsx:21:9]
+ 13 | 
+ 14 |   useEffect(() => {
+    :   ^^^^|^^^^
+    :       `-- This is the containing effect
+ 15 |     const utilisateurSauvegarde = localStorage.getItem(
+ 16 |       "taskflow_utilisateur"
+ 17 |     );
+ 18 | 
+ 19 |     if (utilisateurSauvegarde) {
+ 20 |       try {
+ 21 |         setUtilisateur(JSON.parse(utilisateurSauvegarde));
+    :         ^^^^^^^|^^^^^^
+    :                `-- Avoid calling setState() directly within an effect
+ 22 |       } catch {
+    `----
+  help: Effects should synchronize React with external systems. Calling setState synchronously inside an effect starts another render and is usually unnecessary. Derive the value during render, initialize state directly, or update it from the event that caused the change. Use an effect only when synchronizing with an external system.
+  note: React Compiler skipped optimizing this component or hook. Additional guidance: https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-effect
+
+Found 2 warnings and 0 errors.
+Finished in 187ms on 21 files with 104 rules using 8 threads.
