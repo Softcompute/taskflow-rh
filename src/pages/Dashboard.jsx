@@ -1,62 +1,62 @@
-// Importe les hooks nécessaires depuis React.
+// Importe les hooks nÃ©cessaires depuis React.
 import {
-  // useEffect permet de charger les données après le rendu.
+  // useEffect permet de charger les donnÃ©es aprÃ¨s le rendu.
   useEffect,
 
-  // useState permet de gérer les états du Dashboard.
+  // useState permet de gÃ©rer les Ã©tats du Dashboard.
   useState,
 } from "react";
 
-// Importe Link pour naviguer sans recharger l’application.
+// Importe Link pour naviguer sans recharger lâ€™application.
 import { Link } from "react-router-dom";
 
-// Importe le contexte contenant l’utilisateur connecté.
-import { useAuth } from "../context/AuthContext";
+// Importe le contexte contenant lâ€™utilisateur connectÃ©.
+import { useAuth } from "../hooks/useAuth";
 
-// Importe la fonction qui récupère les données du Dashboard.
+// Importe la fonction qui rÃ©cupÃ¨re les donnÃ©es du Dashboard.
 import {
   obtenirDonneesDashboard,
 } from "../api/dashboard";
 
-// Importe les fonctions utilisées pour calculer les statistiques.
+// Importe les fonctions utilisÃ©es pour calculer les statistiques.
 import {
-  // Calcule l’avancement d’un projet.
+  // Calcule lâ€™avancement dâ€™un projet.
   calculerAvancementProjet,
 
-  // Calcule les statistiques générales.
+  // Calcule les statistiques gÃ©nÃ©rales.
   calculerStatistiques,
 
-  // Récupère les tâches les plus urgentes.
+  // RÃ©cupÃ¨re les tÃ¢ches les plus urgentes.
   obtenirTachesUrgentes,
 } from "../utils/statistiques";
 
 /*
  * Correspondance entre les valeurs techniques
- * des statuts et les textes affichés.
+ * des statuts et les textes affichÃ©s.
  */
 const nomsStatuts = {
   // Texte correspondant au statut a_faire.
-  a_faire: "À faire",
+  a_faire: "Ã€ faire",
 
   // Texte correspondant au statut en_cours.
   en_cours: "En cours",
 
   // Texte correspondant au statut terminee.
-  terminee: "Terminée",
+  terminee: "TerminÃ©e",
 };
 
 /*
  * Correspondance entre les valeurs techniques
- * des priorités et les textes affichés.
+ * des prioritÃ©s et les textes affichÃ©s.
  */
 const nomsPriorites = {
-  // Texte correspondant à la priorité basse.
+  // Texte correspondant Ã  la prioritÃ© basse.
   basse: "Basse",
 
-  // Texte correspondant à la priorité moyenne.
+  // Texte correspondant Ã  la prioritÃ© moyenne.
   moyenne: "Moyenne",
 
-  // Texte correspondant à la priorité haute.
+  // Texte correspondant Ã  la prioritÃ© haute.
   haute: "Haute",
 };
 
@@ -64,31 +64,34 @@ const nomsPriorites = {
  * Composant principal du tableau de bord.
  */
 function Dashboard() {
-  // Récupère l’utilisateur connecté depuis AuthContext.
+  // RÃ©cupÃ¨re lâ€™utilisateur connectÃ© depuis AuthContext.
   const { utilisateur } = useAuth();
 
-  // Récupère son identifiant en toute sécurité.
+  // RÃ©cupÃ¨re son identifiant en toute sÃ©curitÃ©.
   const utilisateurId = utilisateur?.id;
 
-  // État contenant les projets de l’utilisateur.
+  // RÃ©cupÃ¨re le rÃ´le de lâ€™utilisateur connectÃ©.
+  const roleUtilisateur = utilisateur?.role;
+
+  // Ã‰tat contenant les projets de lâ€™utilisateur.
   const [
     projets,
     setProjets,
   ] = useState([]);
 
-  // État contenant les tâches de ses projets.
+  // Ã‰tat contenant les tÃ¢ches de ses projets.
   const [
     taches,
     setTaches,
   ] = useState([]);
 
-  // État indiquant si les données sont en chargement.
+  // Ã‰tat indiquant si les donnÃ©es sont en chargement.
   const [
     chargement,
     setChargement,
   ] = useState(true);
 
-  // État contenant un éventuel message d’erreur.
+  // Ã‰tat contenant un Ã©ventuel message dâ€™erreur.
   const [
     erreur,
     setErreur,
@@ -96,7 +99,7 @@ function Dashboard() {
 
   /*
    * Compteur permettant de relancer useEffect
-   * lorsque l’utilisateur clique sur Réessayer.
+   * lorsque lâ€™utilisateur clique sur RÃ©essayer.
    */
   const [
     rechargement,
@@ -104,101 +107,111 @@ function Dashboard() {
   ] = useState(0);
 
   /*
-   * Charge les projets et les tâches
-   * appartenant à l’utilisateur connecté.
+   * Charge les projets et les tÃ¢ches
+   * appartenant Ã  lâ€™utilisateur connectÃ©.
    */
   useEffect(() => {
-    // Vérifie si l’identifiant de l’utilisateur existe.
+    // VÃ©rifie si lâ€™identifiant de lâ€™utilisateur existe.
     if (!utilisateurId) {
-      // N’exécute aucune requête sans utilisateur.
+      // Nâ€™exÃ©cute aucune requÃªte sans utilisateur.
       return undefined;
     }
 
     /*
-     * Indique si le composant est toujours présent.
-     * Cela évite une modification d’état après sa fermeture.
+     * Indique si le composant est toujours prÃ©sent.
+     * Cela Ã©vite une modification dâ€™Ã©tat aprÃ¨s sa fermeture.
      */
     let composantActif = true;
 
-    // Appelle l’API du tableau de bord.
+    // Appelle lâ€™API du tableau de bord.
     obtenirDonneesDashboard(
-      // Transmet l’identifiant de l’utilisateur.
-      utilisateurId
+      // Transmet lâ€™identifiant de lâ€™utilisateur.
+      utilisateurId,
+
+      /*
+       * Transmet Ã©galement son rÃ´le afin que
+       * le Responsable RH puisse voir tous les projets.
+       */
+      roleUtilisateur
     )
-      // then est exécuté si la requête réussit.
+      // then est exÃ©cutÃ© si la requÃªte rÃ©ussit.
       .then((donnees) => {
-        // Vérifie si la page est toujours ouverte.
+        // VÃ©rifie si la page est toujours ouverte.
         if (!composantActif) {
-          // Arrête le traitement si elle est fermée.
+          // ArrÃªte le traitement si elle est fermÃ©e.
           return;
         }
 
-        // Enregistre les projets reçus.
+        // Enregistre les projets reÃ§us.
         setProjets(donnees.projets);
 
-        // Enregistre les tâches reçues.
+        // Enregistre les tÃ¢ches reÃ§ues.
         setTaches(donnees.taches);
 
-        // Efface un éventuel ancien message d’erreur.
+        // Efface un Ã©ventuel ancien message dâ€™erreur.
         setErreur("");
       })
 
-      // catch est exécuté si la requête échoue.
+      // catch est exÃ©cutÃ© si la requÃªte Ã©choue.
       .catch((erreurRequete) => {
-        // Vérifie si la page est toujours ouverte.
+        // VÃ©rifie si la page est toujours ouverte.
         if (!composantActif) {
-          // Arrête le traitement si elle est fermée.
+          // ArrÃªte le traitement si elle est fermÃ©e.
           return;
         }
 
-        // Enregistre un message d’erreur.
+        // Enregistre un message dâ€™erreur.
         setErreur(
-          // Utilise le message reçu s’il existe.
+          // Utilise le message reÃ§u sâ€™il existe.
           erreurRequete.message ||
-            // Utilise ce message par défaut.
+            // Utilise ce message par dÃ©faut.
             "Impossible de charger le tableau de bord."
         );
       })
 
-      // finally est toujours exécuté à la fin.
+      // finally est toujours exÃ©cutÃ© Ã  la fin.
       .finally(() => {
-        // Vérifie que le composant est toujours actif.
+        // VÃ©rifie que le composant est toujours actif.
         if (composantActif) {
-          // Indique que le chargement est terminé.
+          // Indique que le chargement est terminÃ©.
           setChargement(false);
         }
       });
 
     /*
-     * Fonction de nettoyage exécutée lorsque la page
-     * est fermée ou que ses dépendances changent.
+     * Fonction de nettoyage exÃ©cutÃ©e lorsque la page
+     * est fermÃ©e ou que ses dÃ©pendances changent.
      */
     return () => {
-      // Indique que les états ne doivent plus être modifiés.
+      // Indique que les Ã©tats ne doivent plus Ãªtre modifiÃ©s.
       composantActif = false;
     };
 
     /*
-     * Relance l’effet si utilisateurId
-     * ou rechargement change.
-     */
-  }, [utilisateurId, rechargement]);
+   * Relance lâ€™effet si lâ€™identifiant, le rÃ´le
+   * ou le compteur de rechargement change.
+   */
+  }, [
+    utilisateurId,
+    roleUtilisateur,
+    rechargement,
+  ]);
 
   /*
-   * Calcule les statistiques générales
-   * à partir de toutes les tâches reçues.
+   * Calcule les statistiques gÃ©nÃ©rales
+   * Ã  partir de toutes les tÃ¢ches reÃ§ues.
    */
   const statistiques =
     calculerStatistiques(taches);
 
   /*
-   * Ajoute les informations d’avancement
-   * à chaque projet de l’utilisateur.
+   * Ajoute les informations dâ€™avancement
+   * Ã  chaque projet de lâ€™utilisateur.
    */
   const projetsAvecAvancement = projets.map(
     // Examine chaque projet.
     (projet) =>
-      // Calcule son avancement avec ses tâches.
+      // Calcule son avancement avec ses tÃ¢ches.
       calculerAvancementProjet(
         projet,
         taches
@@ -206,23 +219,23 @@ function Dashboard() {
   );
 
   /*
-   * Récupère au maximum cinq tâches urgentes.
+   * RÃ©cupÃ¨re au maximum cinq tÃ¢ches urgentes.
    */
   const tachesUrgentes =
     obtenirTachesUrgentes(
-      // Tableau contenant toutes les tâches.
+      // Tableau contenant toutes les tÃ¢ches.
       taches,
 
-      // Nombre maximum de tâches à retourner.
+      // Nombre maximum de tÃ¢ches Ã  retourner.
       5
     );
 
   /*
    * Retrouve le nom du projet auquel
-   * une tâche appartient.
+   * une tÃ¢che appartient.
    */
   const obtenirNomProjet = (
-    // Identifiant du projet recherché.
+    // Identifiant du projet recherchÃ©.
     projetId
   ) => {
     // Recherche le projet dans le tableau.
@@ -234,39 +247,39 @@ function Dashboard() {
         String(projetId)
     );
 
-    // Retourne le nom ou un texte par défaut.
+    // Retourne le nom ou un texte par dÃ©faut.
     return projet?.nom || "Projet inconnu";
   };
 
   /*
    * Relance manuellement le chargement
-   * lorsque l’utilisateur clique sur Réessayer.
+   * lorsque lâ€™utilisateur clique sur RÃ©essayer.
    */
   const reessayerChargement = () => {
-    // Réactive l’état de chargement.
+    // RÃ©active lâ€™Ã©tat de chargement.
     setChargement(true);
 
-    // Efface l’ancien message d’erreur.
+    // Efface lâ€™ancien message dâ€™erreur.
     setErreur("");
 
     // Augmente le compteur pour relancer useEffect.
     setRechargement(
-      // Reçoit la valeur précédente.
+      // ReÃ§oit la valeur prÃ©cÃ©dente.
       (ancienneValeur) =>
-        // Ajoute 1 à cette valeur.
+        // Ajoute 1 Ã  cette valeur.
         ancienneValeur + 1
     );
   };
 
   /*
-   * Affiche cet écran tant que les données
+   * Affiche cet Ã©cran tant que les donnÃ©es
    * sont en cours de chargement.
    */
   if (chargement) {
     return (
-      // Conteneur de l’état de chargement.
+      // Conteneur de lâ€™Ã©tat de chargement.
       <div className="etat-page">
-        {/* Message affiché pendant la requête. */}
+        {/* Message affichÃ© pendant la requÃªte. */}
         <p>
           Chargement du tableau de bord...
         </p>
@@ -278,36 +291,36 @@ function Dashboard() {
   return (
     // Section principale du tableau de bord.
     <section className="page-dashboard">
-      {/* En-tête contenant le message d’accueil. */}
+      {/* En-tÃªte contenant le message dâ€™accueil. */}
       <header className="entete-page">
-        {/* Groupe contenant les textes d’introduction. */}
+        {/* Groupe contenant les textes dâ€™introduction. */}
         <div>
           {/* Petit titre de la page. */}
           <p className="petit-titre">
             Tableau de bord
           </p>
 
-          {/* Message de bienvenue personnalisé. */}
+          {/* Message de bienvenue personnalisÃ©. */}
           <h1>
-            {/* Texte placé avant le nom. */}
+            {/* Texte placÃ© avant le nom. */}
             Bonjour,{" "}
 
             {
-              // Affiche le nom de l’utilisateur s’il existe.
+              // Affiche le nom de lâ€™utilisateur sâ€™il existe.
               utilisateur?.nom ||
-                // Texte utilisé si le nom est absent.
+                // Texte utilisÃ© si le nom est absent.
                 "Utilisateur"
             }
           </h1>
 
           {/* Description du contenu de la page. */}
           <p>
-            Voici un aperçu des activités du
-            département RH.
+            Voici un aperÃ§u des activitÃ©s du
+            dÃ©partement RH.
           </p>
         </div>
 
-        {/* Lien permettant d’ouvrir les projets. */}
+        {/* Lien permettant dâ€™ouvrir les projets. */}
         <Link
           to="/projets"
           className="bouton-lien-principal"
@@ -317,16 +330,16 @@ function Dashboard() {
       </header>
 
       {/*
-       * Affiche ce bloc seulement lorsqu’un message
-       * d’erreur existe.
+       * Affiche ce bloc seulement lorsquâ€™un message
+       * dâ€™erreur existe.
        */}
       {erreur && (
-        // Conteneur du message d’erreur.
+        // Conteneur du message dâ€™erreur.
         <div
           className="message-erreur"
           role="alert"
         >
-          {/* Affiche le texte de l’erreur. */}
+          {/* Affiche le texte de lâ€™erreur. */}
           <span>{erreur}</span>
 
           {/* Bouton qui relance le chargement. */}
@@ -335,17 +348,17 @@ function Dashboard() {
             className="bouton-reessayer"
             onClick={reessayerChargement}
           >
-            Réessayer
+            RÃ©essayer
           </button>
         </div>
       )}
 
       {/*
        * Affiche les statistiques seulement
-       * lorsqu’il n’existe aucune erreur.
+       * lorsquâ€™il nâ€™existe aucune erreur.
        */}
       {!erreur && (
-        // Fragment regroupant plusieurs éléments.
+        // Fragment regroupant plusieurs Ã©lÃ©ments.
         <>
           {/* Grille des cartes statistiques. */}
           <div className="cartes-statistiques">
@@ -354,73 +367,73 @@ function Dashboard() {
               {/* Nom de la statistique. */}
               <span>Projets RH</span>
 
-              {/* Nombre de projets de l’utilisateur. */}
+              {/* Nombre de projets de lâ€™utilisateur. */}
               <strong>
                 {projets.length}
               </strong>
             </article>
 
-            {/* Carte affichant le total des tâches. */}
+            {/* Carte affichant le total des tÃ¢ches. */}
             <article className="carte-statistique">
               {/* Nom de la statistique. */}
               <span>Tâches totales</span>
 
-              {/* Nombre total de tâches. */}
+              {/* Nombre total de tÃ¢ches. */}
               <strong>
                 {statistiques.total}
               </strong>
             </article>
 
-            {/* Carte affichant les tâches à faire. */}
+            {/* Carte affichant les tÃ¢ches Ã  faire. */}
             <article className="carte-statistique">
               {/* Nom de la statistique. */}
-              <span>À faire</span>
+              <span>Ã€ faire</span>
 
-              {/* Nombre de tâches qui n’ont pas commencé. */}
+              {/* Nombre de tÃ¢ches qui nâ€™ont pas commencÃ©. */}
               <strong>
                 {statistiques.aFaire}
               </strong>
             </article>
 
-            {/* Carte affichant les tâches en cours. */}
+            {/* Carte affichant les tÃ¢ches en cours. */}
             <article className="carte-statistique">
               {/* Nom de la statistique. */}
               <span>En cours</span>
 
-              {/* Nombre de tâches en traitement. */}
+              {/* Nombre de tÃ¢ches en traitement. */}
               <strong>
                 {statistiques.enCours}
               </strong>
             </article>
 
-            {/* Carte affichant les tâches terminées. */}
+            {/* Carte affichant les tÃ¢ches terminÃ©es. */}
             <article className="carte-statistique">
               {/* Nom de la statistique. */}
-              <span>Terminées</span>
+              <span>Terminees</span>
 
-              {/* Nombre de tâches terminées. */}
+              {/* Nombre de tÃ¢ches terminÃ©es. */}
               <strong>
                 {statistiques.terminees}
               </strong>
             </article>
 
-            {/* Carte affichant l’avancement global. */}
+            {/* Carte affichant lâ€™avancement global. */}
             <article
               className="carte-statistique carte-pourcentage"
             >
               {/* Nom de la statistique. */}
               <span>Avancement global</span>
 
-              {/* Pourcentage total des tâches terminées. */}
+              {/* Pourcentage total des tÃ¢ches terminÃ©es. */}
               <strong>
                 {statistiques.pourcentageTermine} %
               </strong>
 
-              {/* Conteneur extérieur de la progression. */}
+              {/* Conteneur extÃ©rieur de la progression. */}
               <div className="barre-progression">
                 {/*
-                 * Barre intérieure dont la largeur
-                 * dépend du pourcentage terminé.
+                 * Barre intÃ©rieure dont la largeur
+                 * dÃ©pend du pourcentage terminÃ©.
                  */}
                 <div
                   className="progression progression-globale"
@@ -435,9 +448,9 @@ function Dashboard() {
 
           {/* Zone contenant les deux grands blocs du Dashboard. */}
           <div className="sections-dashboard">
-            {/* Bloc présentant l’avancement des projets. */}
+            {/* Bloc prÃ©sentant lâ€™avancement des projets. */}
             <section className="bloc-dashboard">
-              {/* En-tête du bloc. */}
+              {/* En-tÃªte du bloc. */}
               <div className="titre-bloc-dashboard">
                 {/* Groupe contenant le titre et sa description. */}
                 <div>
@@ -448,35 +461,35 @@ function Dashboard() {
 
                   {/* Explication du calcul. */}
                   <p>
-                    Progression calculée à partir
-                    des tâches terminées.
+                    Progression calculÃ©e Ã  partir
+                    des tÃ¢ches terminÃ©es.
                   </p>
                 </div>
 
-                {/* Lien vers la liste complète des projets. */}
+                {/* Lien vers la liste complÃ¨te des projets. */}
                 <Link to="/projets">
                   Tous les projets
                 </Link>
               </div>
 
               {/*
-               * Vérifie si l’utilisateur ne possède
+               * VÃ©rifie si lâ€™utilisateur ne possÃ¨de
                * encore aucun projet.
                */}
               {projetsAvecAvancement.length === 0 ? (
                 // Affichage lorsque la liste est vide.
                 <div className="etat-dashboard">
-                  {/* Message d’état vide. */}
+                  {/* Message dâ€™Ã©tat vide. */}
                   <p>
                     Aucun projet disponible.
                   </p>
 
-                  {/* Lien permettant de créer un projet. */}
+                  {/* Lien permettant de crÃ©er un projet. */}
                   <Link
                     to="/projets"
                     className="bouton-lien-principal"
                   >
-                    Créer un projet
+                    CrÃ©er un projet
                   </Link>
                 </div>
               ) : (
@@ -487,11 +500,11 @@ function Dashboard() {
                    * avec leurs statistiques.
                    */}
                   {projetsAvecAvancement.map(
-                    // Reçoit un projet à chaque passage.
+                    // ReÃ§oit un projet Ã  chaque passage.
                     (projet) => (
-                      // Représente une ligne d’avancement.
+                      // ReprÃ©sente une ligne dâ€™avancement.
                       <article
-                        // Aide React à identifier la ligne.
+                        // Aide React Ã  identifier la ligne.
                         key={projet.id}
                         className="ligne-avancement"
                       >
@@ -507,14 +520,14 @@ function Dashboard() {
                               backgroundColor:
                                 // Utilise la couleur choisie.
                                 projet.couleur ||
-                                // Utilise le bleu par défaut.
+                                // Utilise le bleu par dÃ©faut.
                                 "#2563eb",
                             }}
                           />
 
                           {/* Groupe contenant le nom et les nombres. */}
                           <div>
-                            {/* Lien vers le détail du projet. */}
+                            {/* Lien vers le dÃ©tail du projet. */}
                             <Link
                               to={`/projets/${projet.id}`}
                             >
@@ -522,9 +535,9 @@ function Dashboard() {
                               {projet.nom}
                             </Link>
 
-                            {/* Résumé des tâches terminées. */}
+                            {/* RÃ©sumÃ© des tÃ¢ches terminÃ©es. */}
                             <span>
-                              {/* Nombre de tâches terminées. */}
+                              {/* Nombre de tÃ¢ches terminÃ©es. */}
                               {
                                 projet.nombreTerminees
                               }{" "}
@@ -532,14 +545,14 @@ function Dashboard() {
                               {/* Texte de liaison. */}
                               sur{" "}
 
-                              {/* Nombre total de tâches. */}
+                              {/* Nombre total de tÃ¢ches. */}
                               {projet.nombreTaches}{" "}
 
-                              {/* Mot affiché au singulier. */}
-                              terminée
+                              {/* Mot affichÃ© au singulier. */}
+                              terminee
 
                               {
-                                // Ajoute s si le total est différent de 1.
+                                // Ajoute s si le total est diffÃ©rent de 1.
                                 projet.nombreTaches !== 1
                                   ? "s"
                                   : ""
@@ -550,18 +563,18 @@ function Dashboard() {
 
                         {/* Zone contenant la progression du projet. */}
                         <div className="progression-projet-dashboard">
-                          {/* Pourcentage d’avancement. */}
+                          {/* Pourcentage dâ€™avancement. */}
                           <strong>
                             {projet.pourcentage} %
                           </strong>
 
-                          {/* Conteneur extérieur de la progression. */}
+                          {/* Conteneur extÃ©rieur de la progression. */}
                           <div className="barre-progression">
-                            {/* Partie colorée de la progression. */}
+                            {/* Partie colorÃ©e de la progression. */}
                             <div
                               className="progression"
                               style={{
-                                // Largeur calculée du projet.
+                                // Largeur calculÃ©e du projet.
                                 width:
                                   `${projet.pourcentage}%`,
 
@@ -580,9 +593,9 @@ function Dashboard() {
               )}
             </section>
 
-            {/* Bloc contenant les tâches urgentes. */}
+            {/* Bloc contenant les tÃ¢ches urgentes. */}
             <section className="bloc-dashboard">
-              {/* En-tête du bloc. */}
+              {/* En-tÃªte du bloc. */}
               <div className="titre-bloc-dashboard">
                 {/* Groupe du titre et de sa description. */}
                 <div>
@@ -591,45 +604,45 @@ function Dashboard() {
 
                   {/* Explication du classement. */}
                   <p>
-                    Tâches non terminées classées
-                    par priorité et échéance.
+                    Tâches non termines classes
+                    par prioritÃ© et Ã©chÃ©ance.
                   </p>
                 </div>
               </div>
 
               {/*
-               * Vérifie si aucune tâche urgente
-               * n’a été trouvée.
+               * VÃ©rifie si aucune tÃ¢che urgente
+               * nâ€™a Ã©tÃ© trouvÃ©e.
                */}
               {tachesUrgentes.length === 0 ? (
-                // Affichage lorsqu’il n’existe aucune urgence.
+                // Affichage lorsquâ€™il nâ€™existe aucune urgence.
                 <div className="etat-dashboard">
-                  {/* Message d’état vide. */}
+                  {/* Message dâ€™Ã©tat vide. */}
                   <p>
-                    Aucune tâche urgente.
+                    Aucune tÃ¢che urgente.
                   </p>
                 </div>
               ) : (
-                // Affichage lorsque des tâches urgentes existent.
+                // Affichage lorsque des tÃ¢ches urgentes existent.
                 <div className="liste-urgences">
-                  {/* Parcourt toutes les tâches urgentes. */}
+                  {/* Parcourt toutes les tÃ¢ches urgentes. */}
                   {tachesUrgentes.map(
-                    // Reçoit une tâche à chaque passage.
+                    // ReÃ§oit une tÃ¢che Ã  chaque passage.
                     (tache) => (
-                      // Représente une tâche urgente.
+                      // ReprÃ©sente une tÃ¢che urgente.
                       <article
-                        // Aide React à identifier la tâche.
+                        // Aide React Ã  identifier la tÃ¢che.
                         key={tache.id}
                         className="tache-urgente"
                       >
                         {/* Groupe du titre et du projet. */}
                         <div>
-                          {/* Lien vers le projet de la tâche. */}
+                          {/* Lien vers le projet de la tÃ¢che. */}
                           <Link
                             to={`/projets/${tache.projetId}`}
                             className="titre-tache-urgente"
                           >
-                            {/* Affiche le titre de la tâche. */}
+                            {/* Affiche le titre de la tÃ¢che. */}
                             {tache.titre}
                           </Link>
 
@@ -643,18 +656,18 @@ function Dashboard() {
                           </p>
                         </div>
 
-                        {/* Zone contenant priorité, statut et date. */}
+                        {/* Zone contenant prioritÃ©, statut et date. */}
                         <div className="informations-urgence">
-                          {/* Badge de la priorité. */}
+                          {/* Badge de la prioritÃ©. */}
                           <span
                             className={`badge-priorite priorite-${tache.priorite}`}
                           >
                             {
-                              // Affiche le nom lisible de la priorité.
+                              // Affiche le nom lisible de la prioritÃ©.
                               nomsPriorites[
                                 tache.priorite
                               ] ||
-                                // Utilise la valeur brute par défaut.
+                                // Utilise la valeur brute par dÃ©faut.
                                 tache.priorite
                             }
                           </span>
@@ -668,21 +681,21 @@ function Dashboard() {
                               nomsStatuts[
                                 tache.statut
                               ] ||
-                                // Utilise la valeur brute par défaut.
+                                // Utilise la valeur brute par dÃ©faut.
                                 tache.statut
                             }
                           </span>
 
-                          {/* Affiche l’échéance de la tâche. */}
+                          {/* Affiche lâ€™Ã©chÃ©ance de la tÃ¢che. */}
                           <span className="date-urgence">
-                            {/* Libellé de la date. */}
-                            Échéance :{" "}
+                            {/* LibellÃ© de la date. */}
+                            Ã‰chÃ©ance :{" "}
 
                             {
                               // Affiche la date si elle existe.
                               tache.echeance ||
-                                // Texte affiché si elle est absente.
-                                "Non indiquée"
+                                // Texte affichÃ© si elle est absente.
+                                "Non indiquÃ©e"
                             }
                           </span>
                         </div>

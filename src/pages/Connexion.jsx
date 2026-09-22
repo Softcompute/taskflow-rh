@@ -14,7 +14,7 @@ import {
 } from "react-router-dom";
 
 // Importe le hook qui donne accès à l’authentification.
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 /*
  * Composant représentant la page de connexion.

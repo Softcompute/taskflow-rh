@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 
 // Importe le hook personnalisé d’authentification.
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 /*
  * Ce composant protège les pages privées.

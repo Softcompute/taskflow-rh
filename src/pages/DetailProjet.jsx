@@ -15,7 +15,7 @@ import {
 } from "react-router-dom";
 
 // Donne accès à l’utilisateur actuellement connecté.
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 // Importe le hook responsable du chargement et du rechargement des tâches.
 import useTaches from "../hooks/useTaches";
 

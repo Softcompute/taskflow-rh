@@ -7,7 +7,7 @@ import {
 } from "react";
 
 // Donne accès à l’utilisateur actuellement connecté.
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 // Importe la carte utilisée pour afficher chaque projet.
 import CarteProjet from "../components/CarteProjet";
 
@@ -37,10 +37,10 @@ const formulaireInitial = {
  * Page responsable de l’affichage et du CRUD des projets RH.
  */
 function Projets() {
-  // Récupère l’utilisateur connecté depuis AuthContext.
   const { utilisateur } = useAuth();
-  // Récupère son identifiant sans provoquer d’erreur s’il est absent.
+
   const utilisateurId = utilisateur?.id;
+  const roleUtilisateur = utilisateur?.role;
 
   // Contient les projets affichés dans la page.
   const [projets, setProjets] = useState([]);
@@ -98,7 +98,10 @@ function Projets() {
       // Exécute les deux requêtes en parallèle pour gagner du temps.
       const [projetsRecus, tachesRecues] =
         await Promise.all([
-          obtenirProjets(utilisateurId),
+          obtenirProjets(
+            utilisateurId,
+            roleUtilisateur
+          ),
           obtenirTaches(),
         ]);
 
@@ -121,7 +124,7 @@ function Projets() {
     } finally {
       setChargement(false);
     }
-  }, [utilisateurId]);
+  }, [utilisateurId, roleUtilisateur]);
 
   // Exécute chargerDonnees à l’ouverture ou au changement d’utilisateur.
   useEffect(() => {
@@ -350,7 +353,11 @@ function Projets() {
             Gestion des activités
           </p>
 
-          <h1>Projets RH</h1>
+          <h1>
+            {roleUtilisateur === "Responsable RH"
+              ? "Tous les projets RH"
+              : "Mes projets RH"}
+          </h1>
 
           <p>
             Créez et suivez les projets de votre
@@ -510,7 +517,9 @@ function Projets() {
           <h2>Aucun projet</h2>
 
           <p>
-            Vous n’avez pas encore créé de projet RH.
+            {roleUtilisateur === "Responsable RH"
+              ? "Aucun projet RH n’est enregistré dans le département."
+              : "Vous n’avez pas encore créé de projet RH."}
           </p>
 
           <button
